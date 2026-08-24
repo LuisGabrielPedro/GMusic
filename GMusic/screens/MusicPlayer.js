@@ -1,10 +1,21 @@
-import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import React, { useState } from 'react'
+import {
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions
+} from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import songs from '../model/data';
 import colors from '../theme/colors';
 
 export default function MusicPlayer() {
+  const { width } = useWindowDimensions();
+  const [selectedIndex, setSelectedIndex] = useState();
+  
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
