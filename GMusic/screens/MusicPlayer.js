@@ -1,7 +1,15 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import Ionicons from '@expo/vector-icons/Ionicons'
+import {
+  setAudioModeAsync,
+  useAudioPlaylist,
+  useAudioPlayerStatus,
+  useAudioPlaylistStatus,
+} from 'expo-audio';
 import {
   FlatList,
   Image,
+  Pressable,
   StyleSheet,
   Text,
   View,
@@ -12,18 +20,60 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import songs from '../model/data';
 import colors from '../theme/colors';
 
+const audioSources = songs.map((song) => song.url);
+
 export default function MusicPlayer() {
   const { width } = useWindowDimensions();
   const [selectedIndex, setSelectedIndex] = useState(0);
 
+  const playlistOptions = useMemo(
+    () => ({
+      sources: audioSources,
+      loop: 'none',
+      updateInterval: 250,
+    }),
+    [],
+  );
+
+  const playlist = useAudioPlaylist(playlistOptions);
+  const status = useAudioPlaylistStatus(playlist);
+
   const currentSong = songs[selectedIndex];
   const artworkSize = Math.min(width-40, 380);
+
+  useEffect(() => {
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: false,
+      interruptionMode: 'doNotMix',
+    });
+  }, []);
+
+  useEffect(() => {
+    if (Number.isInteger(status.currentIndex)) {
+      setSelectedIndex(status.currentIndex);
+    }
+  }, [status.currentIndex]);
+
+  function selectSong(index) {
+    if (index < 0 || index >= songs.length || index === selectedIndex) {
+      return;
+    }
+    const shouldResume = status.playing;
+    setSelectedIndex(index);
+    playlist.skipTo(index);
+    if (shouldResume) {
+      playlist.play();
+    }
+  }
 
   function handleMomentEnd(event) {
     const offset = event.nativeEvent.contentOffset.x;
     const index = Math.round(offset / width);
     setSelectedIndex(index);
   }
+
+  
 
   function renderArtwork({ item }) {
     return (
