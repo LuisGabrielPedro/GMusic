@@ -1,6 +1,6 @@
 -- Configuração do GIT
-git config --global user.name gallojunior
-git config --global user.email gallojunior@gmail.com
+git config --global user.name luísgabriel
+git config --global user.email bielito0606@gmail.com
 
 
 -- Criando o projeto
