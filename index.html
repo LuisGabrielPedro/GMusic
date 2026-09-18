@@ -1,0 +1,4213 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="Tutorial progressivo para desenvolver o aplicativo GMusic com React Native, Expo SDK 57 e expo-audio." name="description"/>
+<title>GMusic — Tutorial Progressivo | Expo SDK 57</title>
+<link href="styles.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+<div class="brand">
+<div class="brand-mark">G</div>
+<div>
+<strong>GMusic</strong>
+<span>Tutorial Expo 57</span>
+</div>
+</div>
+<div class="progress-box">
+<div class="progress-line"><span>Progresso</span><strong id="progressText">0%</strong></div>
+<div class="progress-track"><div class="progress-value" id="progressValue"></div></div>
+</div>
+<nav class="nav" id="nav">
+<a href="#inicio">Visão geral</a>
+<a href="#etapa-1">1. Criar o projeto</a>
+<a href="#etapa-2">2. Dependências e assets</a>
+<a href="#etapa-3">3. Estrutura inicial</a>
+<a href="#etapa-4">4. Dados das músicas</a>
+<a href="#etapa-5">5. Carrossel e estado</a>
+<a href="#etapa-6">6. Áudio com expo-audio</a>
+<a href="#etapa-7">7. Effects, refs e memoização</a>
+<a href="#etapa-8">8. Controles do player</a>
+<a href="#etapa-9">9. Slider e tempo</a>
+<a href="#etapa-10">10. Favoritos, repetir e compartilhar</a>
+<a href="#etapa-11">11. Componente IconButton</a>
+<a href="#etapa-12">12. Interface final</a>
+<a href="#etapa-13">13. app.json e splash</a>
+<a href="#etapa-14">14. Testes e diagnóstico</a>
+<a href="#anatomia">Anatomia do código final</a>
+<a href="#conceitos">Guia de conceitos</a>
+<a href="#arquivos-finais">Arquivos finais completos</a>
+<a href="#referencias">Referências</a>
+</nav>
+</aside>
+<button aria-label="Abrir menu" class="menu-button" id="menuButton" type="button">☰</button>
+<main class="content">
+<section class="hero" id="inicio">
+<div class="hero-kicker">REACT NATIVE + EXPO</div>
+<h1>Construindo o GMusic<br/><span>passo a passo</span></h1>
+<p class="hero-lead">Um roteiro progressivo e executável para desenvolver um player musical moderno. Cada etapa informa exatamente qual arquivo criar ou substituir, apresenta o código completo e explica o que mudou antes do próximo teste.</p>
+<div class="hero-meta">
+<span>Expo SDK 57</span><span>React 19</span><span>React Native 0.86</span><span>expo-audio</span>
+</div>
+<div class="hero-actions">
+<a class="primary-link" href="#etapa-1">Começar o tutorial</a>
+<button class="secondary-link" id="resetProgress" type="button">Zerar progresso</button>
+</div>
+</section>
+<section class="intro-grid">
+<article class="info-card"><span class="number">01</span><h2>Construção incremental</h2><p>Em cada etapa adicionamos apenas um conjunto de conceitos e testamos o resultado antes de continuar.</p></article>
+<article class="info-card"><span class="number">02</span><h2>Código explicado</h2><p>Hooks, componentes, propriedades, callbacks e bibliotecas são explicados no momento em que entram no projeto.</p></article>
+<article class="info-card"><span class="number">03</span><h2>Destino conhecido</h2><p>O tutorial termina exatamente na arquitetura atual do GMusic: responsiva, reutilizável e baseada em <code>expo-audio</code>.</p></article>
+</section>
+<section class="chapter preface">
+<div class="chapter-title"><span>Antes de começar</span><h2>Como usar este material em aula</h2></div>
+<p>O objetivo não é entregar o código final no primeiro momento. O aluno deve executar o projeto ao final de cada etapa, observar o comportamento e só então seguir adiante. Nesta versão corrigida, toda etapa que modifica um arquivo informa explicitamente o caminho e fornece o arquivo completo. Os blocos menores identificados como “Somente para entender” servem apenas para explicar partes do código e não precisam ser inseridos manualmente.</p>
+<div class="checklist static">
+<label><input disabled="" type="checkbox"/> Ler o objetivo da etapa</label>
+<label><input disabled="" type="checkbox"/> Digitar ou copiar o código</label>
+<label><input disabled="" type="checkbox"/> Executar o projeto</label>
+<label><input disabled="" type="checkbox"/> Observar o que mudou</label>
+<label><input disabled="" type="checkbox"/> Explicar por que funcionou</label>
+</div>
+</section>
+<section class="chapter step" data-step="1" id="etapa-1">
+<div class="step-head"><div class="step-index">01</div><div><span class="chapter-tag">FUNDAÇÃO</span><h2>Criar o projeto Expo SDK 57</h2></div></div>
+<p>Vamos começar com o template <strong>blank</strong>. Ele é apropriado para esta atividade porque cria uma base enxuta, sem Expo Router e sem uma estrutura de navegação que ainda não precisamos explicar.</p>
+<details class="code-card" open="">
+<summary><span>Comandos</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">bash</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-bash">npx create-expo-app@latest GMusic --template blank@57
+cd GMusic</code></pre>
+</details>
+<div class="callout note"><strong>Por que fixar @57?</strong><p>O tutorial foi construído e testado sobre o Expo SDK 57. Fixar a versão deixa todos os alunos trabalhando com a mesma base, evitando diferenças causadas por atualizações futuras do template.</p></div>
+<h3>O que esses comandos fazem?</h3>
+<div class="explain-list">
+<div><code>npx</code><p>Executa um pacote Node sem exigir uma instalação global permanente.</p></div>
+<div><code>create-expo-app</code><p>Cria a estrutura inicial de um projeto Expo.</p></div>
+<div><code>GMusic</code><p>É o nome da pasta e do projeto criado.</p></div>
+<div><code>--template blank@57</code><p>Solicita o template vazio correspondente ao SDK 57.</p></div>
+<div><code>cd GMusic</code><p>Entra na pasta do projeto para que os próximos comandos sejam executados no local correto.</p></div>
+</div>
+<div class="test-box"><strong>Teste 1</strong><p>Execute <code>npx expo start --web</code>. Neste momento basta confirmar que o projeto padrão abre sem erros.</p></div>
+<label class="step-check"><input class="progress-check" data-key="step-1" type="checkbox"/> Etapa concluída</label>
+</section>
+<section class="chapter step" data-step="2" id="etapa-2">
+<div class="step-head"><div class="step-index">02</div><div><span class="chapter-tag">PREPARAÇÃO</span><h2>Instalar as bibliotecas e copiar os assets</h2></div></div>
+<p>Agora instalamos apenas as bibliotecas realmente usadas pela versão final. O comando <code>npx expo install</code> é preferível porque escolhe versões compatíveis com o SDK do projeto.</p>
+<details class="code-card" open="">
+<summary><span>Instalar dependências</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">bash</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-bash">npx expo install expo-audio expo-linear-gradient expo-splash-screen expo-status-bar
+npx expo install react-native-safe-area-context @react-native-community/slider
+npx expo install @expo/vector-icons expo-font
+npx expo install react-dom react-native-web @expo/metro-runtime</code></pre>
+</details>
+<h3>Bibliotecas utilizadas</h3>
+<div class="library-grid">
+<article><code>expo-audio</code><p>Reprodução de áudio e gerenciamento da playlist.</p></article>
+<article><code>expo-linear-gradient</code><p>Gradientes de fundo e sobreposição sobre as capas.</p></article>
+<article><code>react-native-safe-area-context</code><p>Evita que a interface fique sob notch, barra de status ou indicador inferior.</p></article>
+<article><code>@react-native-community/slider</code><p>Barra de progresso interativa da música.</p></article>
+<article><code>@expo/vector-icons</code><p>Disponibiliza os ícones Ionicons usados nos controles.</p></article>
+<article><code>react-native-web</code><p>Permite executar a interface React Native no navegador.</p></article>
+</div>
+<h3>Copiar os arquivos de mídia</h3>
+<p>Copie a pasta <code>assets</code> utilizada no projeto. O tutorial considera a seguinte estrutura:</p>
+<details class="code-card" open="">
+<summary><span>Estrutura de assets</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">text</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-text">assets/
+├── adaptive-icon.png
+├── favicon.png
+├── icon.png
+├── splash.png
+├── img/
+│   ├── gallo.png
+│   ├── marcio.png
+│   ├── edriano.png
+│   ├── rosiene.png
+│   ├── gabi.png
+│   ├── silvinha.png
+│   └── valdemir.png
+└── audio/
+    ├── gallo.mp3
+    ├── marcio.mp3
+    ├── edriano.mp3
+    ├── rosiene.mp3
+    ├── gabi.mp3
+    ├── silvinha.mp3
+    └── valdemir.mp3</code></pre>
+</details>
+<div class="callout warning"><strong>Importante</strong><p>Os nomes dos arquivos precisam coincidir com os caminhos usados em <code>model/data.js</code>. Em React Native, o <code>require()</code> de um asset local é resolvido durante o empacotamento da aplicação.</p></div>
+<label class="step-check"><input class="progress-check" data-key="step-2" type="checkbox"/> Etapa concluída</label>
+</section>
+<section class="chapter step" data-step="3" id="etapa-3">
+<div class="step-head"><div class="step-index">03</div><div><span class="chapter-tag">COMPONENTES</span><h2>Montar a estrutura inicial da aplicação</h2></div></div>
+<p>Vamos separar a tela principal, as cores e o ponto de entrada. Essa organização já prepara o projeto para crescer sem transformar <code>App.js</code> em um arquivo gigantesco.</p>
+<details class="code-card" open="">
+<summary><span>Criar pastas — PowerShell, CMD ou terminal compatível</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">bash</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-bash">mkdir screens
+mkdir model
+mkdir components
+mkdir theme
+mkdir utils</code></pre>
+</details>
+<p>No Windows, as pastas também podem ser criadas diretamente pelo Explorer ou pelo VS Code.</p>
+<h3>1. Criar <code>theme/colors.js</code></h3>
+<details class="code-card" open="">
+<summary><span>Arquivo completo — theme/colors.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">const colors = {
+  background: '#0D1117',
+  backgroundSoft: '#151B24',
+  surface: '#1D2530',
+  surfaceElevated: '#252F3C',
+  primary: '#FFD369',
+  primarySoft: 'rgba(255, 211, 105, 0.16)',
+  text: '#F7F8FA',
+  textSecondary: '#A8B0BC',
+  textMuted: '#707986',
+  border: 'rgba(255, 255, 255, 0.08)',
+  white: '#FFFFFF',
+  danger: '#FF7A7A',
+  dangerSoft: 'rgba(255, 122, 122, 0.14)',
+  shadow: '#000000',
+};
+
+export default colors;</code></pre>
+</details>
+<p>Centralizar as cores evita espalhar valores hexadecimais pela aplicação. Se a identidade visual mudar, temos um único lugar para alterar.</p>
+<h3>2. Criar <code>screens/MusicPlayer.js</code></h3>
+<details class="code-card" open="">
+<summary><span>Arquivo completo — screens/MusicPlayer.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import colors from '../theme/colors';
+
+export default function MusicPlayer() {
+  return (
+    &lt;SafeAreaView style={styles.container}&gt;
+      &lt;View style={styles.content}&gt;
+        &lt;Text style={styles.eyebrow}&gt;TOCANDO AGORA&lt;/Text&gt;
+        &lt;Text style={styles.title}&gt;GMusic&lt;/Text&gt;
+        &lt;Text style={styles.description}&gt;
+          Nosso player começa aqui.
+        &lt;/Text&gt;
+      &lt;/View&gt;
+    &lt;/SafeAreaView&gt;
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  content: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  eyebrow: {
+    color: colors.primary,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.8,
+  },
+  title: {
+    marginTop: 8,
+    color: colors.text,
+    fontSize: 32,
+    fontWeight: '800',
+  },
+  description: {
+    marginTop: 10,
+    color: colors.textSecondary,
+    fontSize: 15,
+  },
+});</code></pre>
+</details>
+<h3>3. Atualizar <code>App.js</code></h3>
+<details class="code-card" open="">
+<summary><span>Arquivo completo — App.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">import { StatusBar } from 'expo-status-bar';
+import {
+  initialWindowMetrics,
+  SafeAreaProvider,
+} from 'react-native-safe-area-context';
+
+import MusicPlayer from './screens/MusicPlayer';
+
+export default function App() {
+  return (
+    &lt;SafeAreaProvider initialMetrics={initialWindowMetrics}&gt;
+      &lt;StatusBar style="light" translucent /&gt;
+      &lt;MusicPlayer /&gt;
+    &lt;/SafeAreaProvider&gt;
+  );
+}</code></pre>
+</details>
+<div class="explain-list">
+<div><code>SafeAreaProvider</code><p>Disponibiliza para os componentes as informações de área segura do dispositivo.</p></div>
+<div><code>SafeAreaView</code><p>Usa essas informações para manter o conteúdo fora das regiões ocupadas pelo sistema.</p></div>
+<div><code>StatusBar</code><p>Controla a aparência da barra de status. Aqui usamos ícones claros e modo translúcido.</p></div>
+<div><code>StyleSheet.create()</code><p>Organiza os estilos React Native em um objeto com nomes reutilizáveis.</p></div>
+</div>
+<div class="test-box"><strong>Teste 2</strong><p>Execute novamente. A tela deve mostrar “TOCANDO AGORA”, “GMusic” e “Nosso player começa aqui” sobre o fundo escuro.</p></div>
+<label class="step-check"><input class="progress-check" data-key="step-3" type="checkbox"/> Etapa concluída</label>
+</section>
+<section class="chapter step" data-step="4" id="etapa-4">
+<div class="step-head"><div class="step-index">04</div><div><span class="chapter-tag">DADOS</span><h2>Criar o catálogo de músicas</h2></div></div>
+<p>Em vez de escrever título, artista, imagem e áudio diretamente na tela, vamos representar cada música como um objeto JavaScript. O conjunto de objetos forma um array chamado <code>songs</code>.</p>
+<details class="code-card" open="">
+<summary><span>Arquivo completo — model/data.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">const songs = [
+  {
+    id: 1,
+    title: 'Gallo, O Bárbaro',
+    artist: 'Márcio J. Morais',
+    artwork: require('../assets/img/gallo.png'),
+    url: require('../assets/audio/gallo.mp3'),
+  },
+  {
+    id: 2,
+    title: 'Márcio, Mestre Frontend',
+    artist: 'JA Gallo Junior',
+    artwork: require('../assets/img/marcio.png'),
+    url: require('../assets/audio/marcio.mp3'),
+  },
+  {
+    id: 3,
+    title: 'A Jornada de Edriano',
+    artist: 'JA Gallo Junior',
+    artwork: require('../assets/img/edriano.png'),
+    url: require('../assets/audio/edriano.mp3'),
+  },
+  {
+    id: 4,
+    title: 'Rosiene, A Especialista',
+    artist: 'JA Gallo Junior',
+    artwork: require('../assets/img/rosiene.png'),
+    url: require('../assets/audio/rosiene.mp3'),
+  },
+  {
+    id: 5,
+    title: 'Gabi Acelerada',
+    artist: 'JA Gallo Junior',
+    artwork: require('../assets/img/gabi.png'),
+    url: require('../assets/audio/gabi.mp3'),
+  },
+  {
+    id: 6,
+    title: 'Discoteca da Educação Física',
+    artist: 'JA Gallo Junior',
+    artwork: require('../assets/img/silvinha.png'),
+    url: require('../assets/audio/silvinha.mp3'),
+  },
+  {
+    id: 7,
+    title: 'Valdemir, O Viajante',
+    artist: 'JA Gallo Junior',
+    artwork: require('../assets/img/valdemir.png'),
+    url: require('../assets/audio/valdemir.mp3'),
+  },
+];
+
+export default songs;</code></pre>
+</details>
+<h3>Entendendo um objeto da lista</h3>
+<details class="code-card" open="">
+<summary><span>Trecho — uma música</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">{
+  id: 1,
+  title: 'Gallo, O Bárbaro',
+  artist: 'Márcio J. Morais',
+  artwork: require('../assets/img/gallo.png'),
+  url: require('../assets/audio/gallo.mp3'),
+}</code></pre>
+</details>
+<div class="explain-list">
+<div><code>id</code><p>Identificador único. É usado, por exemplo, como chave da lista e para controlar favoritos.</p></div>
+<div><code>title</code><p>Texto apresentado como nome da música.</p></div>
+<div><code>artist</code><p>Nome do artista ou autor exibido na interface.</p></div>
+<div><code>artwork</code><p>Referência estática para a imagem local da capa.</p></div>
+<div><code>url</code><p>Referência estática para o arquivo MP3 que será entregue ao player.</p></div>
+</div>
+<div class="callout note"><strong>Separação de responsabilidades</strong><p>A tela não precisa saber onde cada arquivo está. Ela recebe os dados do módulo <code>data.js</code>. Isso deixa a interface mais limpa e facilita adicionar novas músicas.</p></div>
+<label class="step-check"><input class="progress-check" data-key="step-4" type="checkbox"/> Etapa concluída</label>
+</section>
+<section class="chapter step" data-step="5" id="etapa-5">
+<div class="step-head"><div class="step-index">05</div><div><span class="chapter-tag">INTERAÇÃO</span><h2>Exibir as capas em carrossel e introduzir useState</h2></div></div>
+<p>Agora o aluno verá a relação entre <strong>dados</strong> e <strong>interface</strong>. A <code>FlatList</code> recebe o array de músicas e renderiza uma página horizontal para cada item.</p>
+<details class="code-card" open="">
+<summary><span>Arquivo completo nesta etapa — screens/MusicPlayer.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">import { useState } from 'react';
+import {
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import songs from '../model/data';
+import colors from '../theme/colors';
+
+export default function MusicPlayer() {
+  const { width } = useWindowDimensions();
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const currentSong = songs[selectedIndex];
+  const artworkSize = Math.min(width - 40, 380);
+
+  function handleMomentumEnd(event) {
+    const offset = event.nativeEvent.contentOffset.x;
+    const index = Math.round(offset / width);
+    setSelectedIndex(index);
+  }
+
+  function renderArtwork({ item }) {
+    return (
+      &lt;View style={[styles.artworkPage, { width }]}&gt;
+        &lt;Image
+          source={item.artwork}
+          style={[
+            styles.artwork,
+            { width: artworkSize, height: artworkSize },
+          ]}
+        /&gt;
+      &lt;/View&gt;
+    );
+  }
+
+  return (
+    &lt;SafeAreaView style={styles.container}&gt;
+      &lt;View style={styles.header}&gt;
+        &lt;Text style={styles.eyebrow}&gt;TOCANDO AGORA&lt;/Text&gt;
+        &lt;Text style={styles.counter}&gt;
+          {selectedIndex + 1} de {songs.length}
+        &lt;/Text&gt;
+      &lt;/View&gt;
+
+      &lt;FlatList
+        data={songs}
+        horizontal
+        pagingEnabled
+        renderItem={renderArtwork}
+        keyExtractor={(item) =&gt; String(item.id)}
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handleMomentumEnd}
+      /&gt;
+
+      &lt;View style={styles.metadata}&gt;
+        &lt;Text style={styles.songTitle}&gt;{currentSong.title}&lt;/Text&gt;
+        &lt;Text style={styles.songArtist}&gt;{currentSong.artist}&lt;/Text&gt;
+      &lt;/View&gt;
+    &lt;/SafeAreaView&gt;
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  header: {
+    height: 70,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  eyebrow: {
+    color: colors.primary,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+  },
+  counter: {
+    color: colors.textSecondary,
+    fontSize: 12,
+  },
+  artworkPage: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  artwork: {
+    borderRadius: 24,
+  },
+  metadata: {
+    minHeight: 110,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  songTitle: {
+    color: colors.text,
+    fontSize: 22,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  songArtist: {
+    marginTop: 6,
+    color: colors.textSecondary,
+    fontSize: 14,
+  },
+});</code></pre>
+</details>
+<h3>O primeiro Hook: <code>useState</code></h3>
+<details class="code-card" open="">
+<summary><span>Trecho</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">const [selectedIndex, setSelectedIndex] = useState(0);</code></pre>
+</details>
+<p><code>useState</code> cria uma informação que pertence ao componente e que pode mudar durante o uso. Aqui:</p>
+<ul class="bullets">
+<li><code>selectedIndex</code> guarda o índice da música atualmente selecionada.</li>
+<li><code>setSelectedIndex</code> altera esse valor.</li>
+<li><code>0</code> é o valor inicial, portanto a primeira música começa selecionada.</li>
+<li>Quando o estado muda, o React renderiza novamente o que depende dele.</li>
+</ul>
+<h3>Como sabemos qual capa terminou de aparecer?</h3>
+<details class="code-card" open="">
+<summary><span>Trecho</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">function handleMomentumEnd(event) {
+  const offset = event.nativeEvent.contentOffset.x;
+  const index = Math.round(offset / width);
+  setSelectedIndex(index);
+}</code></pre>
+</details>
+<p>O deslocamento horizontal é dividido pela largura da tela. Se a tela tem 400 pixels e a lista terminou em 800, estamos aproximadamente no índice 2. <code>Math.round()</code> arredonda o resultado para o índice inteiro mais próximo.</p>
+<h3>Responsividade com <code>useWindowDimensions</code></h3>
+<p>Em vez de capturar a largura uma única vez, <code>useWindowDimensions()</code> acompanha alterações no tamanho da janela. Isso é útil em web, tablets e mudanças de orientação.</p>
+<div class="test-box"><strong>Teste 3</strong><p>Arraste as capas. O título e o artista devem acompanhar a música selecionada. Redimensione a janela no modo web e observe que o tamanho máximo da capa permanece controlado.</p></div>
+<label class="step-check"><input class="progress-check" data-key="step-5" type="checkbox"/> Etapa concluída</label>
+</section>
+<section class="chapter step" data-step="6" id="etapa-6">
+<div class="step-head"><div class="step-index">06</div><div><span class="chapter-tag">ÁUDIO</span><h2>Adicionar o player com expo-audio</h2></div></div>
+<p>A versão atual usa <code>expo-audio</code>. Em vez de criar e destruir manualmente um objeto de áudio a cada troca, montamos uma <strong>playlist</strong> com as fontes de todas as músicas.</p>
+<details class="code-card">
+<summary><span>Arquivo completo nesta etapa — screens/MusicPlayer.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">import Ionicons from '@expo/vector-icons/Ionicons';
+import {
+  setAudioModeAsync,
+  useAudioPlaylist,
+  useAudioPlaylistStatus,
+} from 'expo-audio';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  FlatList,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import songs from '../model/data';
+import colors from '../theme/colors';
+
+const audioSources = songs.map((song) =&gt; song.url);
+
+export default function MusicPlayer() {
+  const { width } = useWindowDimensions();
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const playlistOptions = useMemo(
+    () =&gt; ({
+      sources: audioSources,
+      loop: 'none',
+      updateInterval: 250,
+    }),
+    [],
+  );
+
+  const playlist = useAudioPlaylist(playlistOptions);
+  const status = useAudioPlaylistStatus(playlist);
+
+  const currentSong = songs[selectedIndex];
+  const artworkSize = Math.min(width - 40, 380);
+
+  useEffect(() =&gt; {
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: false,
+      interruptionMode: 'doNotMix',
+    });
+  }, []);
+
+  useEffect(() =&gt; {
+    if (Number.isInteger(status.currentIndex)) {
+      setSelectedIndex(status.currentIndex);
+    }
+  }, [status.currentIndex]);
+
+  function selectSong(index) {
+    if (index &lt; 0 || index &gt;= songs.length || index === selectedIndex) {
+      return;
+    }
+
+    const shouldResume = status.playing;
+    setSelectedIndex(index);
+    playlist.skipTo(index);
+
+    if (shouldResume) {
+      playlist.play();
+    }
+  }
+
+  function handleMomentumEnd(event) {
+    const offset = event.nativeEvent.contentOffset.x;
+    const index = Math.round(offset / width);
+    selectSong(index);
+  }
+
+  function handlePlayPause() {
+    if (status.playing) {
+      playlist.pause();
+    } else {
+      playlist.play();
+    }
+  }
+
+  function renderArtwork({ item }) {
+    return (
+      &lt;View style={[styles.artworkPage, { width }]}&gt;
+        &lt;Image
+          source={item.artwork}
+          style={[
+            styles.artwork,
+            { width: artworkSize, height: artworkSize },
+          ]}
+        /&gt;
+      &lt;/View&gt;
+    );
+  }
+
+  return (
+    &lt;SafeAreaView style={styles.container}&gt;
+      &lt;FlatList
+        data={songs}
+        horizontal
+        pagingEnabled
+        renderItem={renderArtwork}
+        keyExtractor={(item) =&gt; String(item.id)}
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handleMomentumEnd}
+      /&gt;
+
+      &lt;View style={styles.metadata}&gt;
+        &lt;Text style={styles.songTitle}&gt;{currentSong.title}&lt;/Text&gt;
+        &lt;Text style={styles.songArtist}&gt;{currentSong.artist}&lt;/Text&gt;
+      &lt;/View&gt;
+
+      &lt;Pressable
+        disabled={!status.isLoaded}
+        onPress={handlePlayPause}
+        style={styles.playButton}
+      &gt;
+        &lt;Ionicons
+          name={status.playing ? 'pause' : 'play'}
+          size={38}
+          color={colors.background}
+        /&gt;
+      &lt;/Pressable&gt;
+    &lt;/SafeAreaView&gt;
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: colors.background,
+    paddingBottom: 28,
+  },
+  artworkPage: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  artwork: {
+    borderRadius: 24,
+  },
+  metadata: {
+    minHeight: 90,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  songTitle: {
+    color: colors.text,
+    fontSize: 22,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  songArtist: {
+    marginTop: 6,
+    color: colors.textSecondary,
+    fontSize: 14,
+  },
+  playButton: {
+    width: 78,
+    height: 78,
+    borderRadius: 39,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+  },
+});</code></pre>
+</details>
+<h3>Preparar as fontes</h3>
+<details class="code-card" open="">
+<summary><span>Trecho</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">const audioSources = songs.map((song) =&gt; song.url);</code></pre>
+</details>
+<p><code>map()</code> percorre o array de músicas e cria um novo array contendo apenas as propriedades <code>url</code>. É esse array que a playlist precisa receber.</p>
+<h3>Criar a playlist e observar o status</h3>
+<details class="code-card" open="">
+<summary><span>Trecho</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">const playlist = useAudioPlaylist(playlistOptions);
+const status = useAudioPlaylistStatus(playlist);</code></pre>
+</details>
+<div class="explain-list">
+<div><code>useAudioPlaylist</code><p>Cria e mantém a playlist associada ao ciclo de vida do componente.</p></div>
+<div><code>useAudioPlaylistStatus</code><p>Entrega informações reativas como reprodução, carregamento, duração, posição e índice atual.</p></div>
+<div><code>status.playing</code><p>Indica se o áudio está tocando.</p></div>
+<div><code>status.isLoaded</code><p>Informa se o player já está pronto para receber comandos.</p></div>
+</div>
+<h3>Play e pause</h3>
+<details class="code-card" open="">
+<summary><span>Trecho</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">function handlePlayPause() {
+  if (status.playing) {
+    playlist.pause();
+  } else {
+    playlist.play();
+  }
+}</code></pre>
+</details>
+<p>A interface não precisa manter um segundo estado chamado <code>isPlaying</code>. O próprio status do player é a fonte da verdade.</p>
+<div class="test-box"><strong>Teste 4</strong><p>Pressione play e pause. Depois arraste para outra capa. Se a música estava tocando, a nova faixa deve assumir a reprodução.</p></div>
+<label class="step-check"><input class="progress-check" data-key="step-6" type="checkbox"/> Etapa concluída</label>
+</section>
+<section class="chapter step" data-step="7" id="etapa-7">
+<div class="step-head"><div class="step-index">07</div><div><span class="chapter-tag">HOOKS</span><h2>Organizar o player com useEffect, useRef, useMemo e useCallback</h2></div></div>
+<div class="action-box"><strong>O que fazer nesta etapa</strong><p>Abra <span class="file-path">screens/MusicPlayer.js</span> e <strong>substitua todo o conteúdo do arquivo</strong> pelo código abaixo.</p><p>Não é necessário inserir nenhum trecho manualmente em posições específicas.</p></div>
+<p>A etapa 6 já colocou o áudio para funcionar. Agora organizaremos o mesmo player com quatro Hooks importantes: <code>useEffect</code>, <code>useRef</code>, <code>useMemo</code> e <code>useCallback</code>. O objetivo é entender cada um deles em um código que continua executável.</p>
+<details class="code-card" open="">
+<summary><span>Substitua o arquivo inteiro — screens/MusicPlayer.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">import Ionicons from '@expo/vector-icons/Ionicons';
+import {
+  setAudioModeAsync,
+  useAudioPlaylist,
+  useAudioPlaylistStatus,
+} from 'expo-audio';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  FlatList,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import songs from '../model/data';
+import colors from '../theme/colors';
+
+const audioSources = songs.map((song) =&gt; song.url);
+
+export default function MusicPlayer() {
+  const { width } = useWindowDimensions();
+  const listRef = useRef(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const playlistOptions = useMemo(
+    () =&gt; ({
+      sources: audioSources,
+      loop: 'none',
+      updateInterval: 250,
+    }),
+    [],
+  );
+
+  const playlist = useAudioPlaylist(playlistOptions);
+  const status = useAudioPlaylistStatus(playlist);
+
+  const currentSong = songs[selectedIndex];
+  const artworkSize = Math.min(width - 40, 380);
+
+  useEffect(() =&gt; {
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: false,
+      interruptionMode: 'doNotMix',
+    });
+  }, []);
+
+  useEffect(() =&gt; {
+    if (
+      Number.isInteger(status.currentIndex) &amp;&amp;
+      status.currentIndex &gt;= 0 &amp;&amp;
+      status.currentIndex &lt; songs.length
+    ) {
+      setSelectedIndex(status.currentIndex);
+    }
+  }, [status.currentIndex]);
+
+  useEffect(() =&gt; {
+    listRef.current?.scrollToIndex({
+      index: selectedIndex,
+      animated: true,
+    });
+  }, [selectedIndex, width]);
+
+  const selectSong = useCallback(
+    (index) =&gt; {
+      if (index &lt; 0 || index &gt;= songs.length || index === selectedIndex) {
+        return;
+      }
+
+      const shouldResume = status.playing;
+      setSelectedIndex(index);
+      playlist.skipTo(index);
+
+      if (shouldResume) {
+        playlist.play();
+      }
+    },
+    [playlist, selectedIndex, status.playing],
+  );
+
+  const handleMomentumEnd = useCallback(
+    (event) =&gt; {
+      const offset = event.nativeEvent.contentOffset.x;
+      const index = Math.round(offset / width);
+      selectSong(index);
+    },
+    [selectSong, width],
+  );
+
+  const handlePlayPause = useCallback(() =&gt; {
+    if (status.playing) {
+      playlist.pause();
+    } else {
+      playlist.play();
+    }
+  }, [playlist, status.playing]);
+
+  const renderArtwork = useCallback(
+    ({ item }) =&gt; (
+      &lt;View style={[styles.artworkPage, { width }]}&gt;
+        &lt;Image
+          source={item.artwork}
+          style={[
+            styles.artwork,
+            { width: artworkSize, height: artworkSize },
+          ]}
+        /&gt;
+      &lt;/View&gt;
+    ),
+    [artworkSize, width],
+  );
+
+  return (
+    &lt;SafeAreaView style={styles.container}&gt;
+      &lt;View style={styles.header}&gt;
+        &lt;Text style={styles.eyebrow}&gt;TOCANDO AGORA&lt;/Text&gt;
+        &lt;Text style={styles.counter}&gt;
+          {selectedIndex + 1} de {songs.length}
+        &lt;/Text&gt;
+      &lt;/View&gt;
+
+      &lt;FlatList
+        ref={listRef}
+        data={songs}
+        horizontal
+        pagingEnabled
+        renderItem={renderArtwork}
+        keyExtractor={(item) =&gt; String(item.id)}
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handleMomentumEnd}
+        getItemLayout={(_, index) =&gt; ({
+          length: width,
+          offset: width * index,
+          index,
+        })}
+      /&gt;
+
+      &lt;View style={styles.metadata}&gt;
+        &lt;Text style={styles.songTitle}&gt;{currentSong.title}&lt;/Text&gt;
+        &lt;Text style={styles.songArtist}&gt;{currentSong.artist}&lt;/Text&gt;
+      &lt;/View&gt;
+
+      &lt;Pressable
+        disabled={!status.isLoaded}
+        onPress={handlePlayPause}
+        style={styles.playButton}
+      &gt;
+        &lt;Ionicons
+          name={status.playing ? 'pause' : 'play'}
+          size={38}
+          color={colors.background}
+        /&gt;
+      &lt;/Pressable&gt;
+    &lt;/SafeAreaView&gt;
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    paddingBottom: 28,
+  },
+  header: {
+    height: 70,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  eyebrow: {
+    color: colors.primary,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+  },
+  counter: {
+    color: colors.textSecondary,
+    fontSize: 12,
+  },
+  artworkPage: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  artwork: {
+    borderRadius: 24,
+  },
+  metadata: {
+    minHeight: 90,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  songTitle: {
+    color: colors.text,
+    fontSize: 22,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  songArtist: {
+    marginTop: 6,
+    color: colors.textSecondary,
+    fontSize: 14,
+  },
+  playButton: {
+    width: 78,
+    height: 78,
+    alignSelf: 'center',
+    borderRadius: 39,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+  },
+});</code></pre>
+</details>
+<h3>O que foi acrescentado?</h3>
+<div class="explain-list"><div><code>useRef</code><p><code>listRef</code> guarda a referência da FlatList. Assim o código pode chamar <code>scrollToIndex()</code> para mover visualmente o carrossel quando o índice muda por outro caminho.</p></div><div><code>useEffect</code><p>Há um efeito para configurar o áudio, outro para ouvir o índice atual da playlist e outro para sincronizar o carrossel.</p></div><div><code>useMemo</code><p>Mantém o objeto de opções da playlist estável entre renderizações.</p></div><div><code>useCallback</code><p>É usado em funções como <code>selectSong</code>, <code>handleMomentumEnd</code> e <code>renderArtwork</code>, preservando suas referências conforme as dependências.</p></div></div>
+<div class="explain-only"><strong>Importante:</strong> os exemplos curtos abaixo são apenas para explicação. O aluno já colocou tudo no arquivo completo acima.</div>
+<details class="code-card">
+<summary><span>Somente para entender — useRef e scrollToIndex</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">const listRef = useRef(null);
+
+// Na FlatList:
+ref={listRef}
+
+// Para mover a lista:
+listRef.current?.scrollToIndex({
+  index: selectedIndex,
+  animated: true,
+});</code></pre>
+</details>
+<div class="test-box"><strong>Teste 5</strong><p>Execute o projeto. Arraste o carrossel e use play/pause. A capa, o título, o artista e o índice devem continuar sincronizados. Abra o código e identifique onde cada Hook é declarado.</p></div>
+<label class="step-check"><input class="progress-check" data-key="step-7" type="checkbox"/> Etapa concluída</label>
+</section>
+<section class="chapter step" data-step="8" id="etapa-8">
+<div class="step-head"><div class="step-index">08</div><div><span class="chapter-tag">PLAYER</span><h2>Implementar anterior, próxima e navegação circular</h2></div></div>
+<div class="action-box"><strong>O que fazer nesta etapa</strong><p>Novamente, abra <span class="file-path">screens/MusicPlayer.js</span> e <strong>substitua o arquivo inteiro</strong>. Esta versão acrescenta os botões anterior e próxima, sem exigir edição localizada.</p></div>
+<p>Agora teremos três controles de reprodução. A troca de faixa continua centralizada em <code>selectSong()</code>, evitando repetir a mesma regra em vários lugares.</p>
+<details class="code-card" open="">
+<summary><span>Substitua o arquivo inteiro — screens/MusicPlayer.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">import Ionicons from '@expo/vector-icons/Ionicons';
+import {
+  setAudioModeAsync,
+  useAudioPlaylist,
+  useAudioPlaylistStatus,
+} from 'expo-audio';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  FlatList,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import songs from '../model/data';
+import colors from '../theme/colors';
+
+const audioSources = songs.map((song) =&gt; song.url);
+
+export default function MusicPlayer() {
+  const { width } = useWindowDimensions();
+  const listRef = useRef(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const playlistOptions = useMemo(
+    () =&gt; ({
+      sources: audioSources,
+      loop: 'none',
+      updateInterval: 250,
+    }),
+    [],
+  );
+
+  const playlist = useAudioPlaylist(playlistOptions);
+  const status = useAudioPlaylistStatus(playlist);
+
+  const currentSong = songs[selectedIndex];
+  const artworkSize = Math.min(width - 40, 380);
+  const currentTime = Number.isFinite(status.currentTime) ? status.currentTime : 0;
+
+  useEffect(() =&gt; {
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: false,
+      interruptionMode: 'doNotMix',
+    });
+  }, []);
+
+  useEffect(() =&gt; {
+    if (
+      Number.isInteger(status.currentIndex) &amp;&amp;
+      status.currentIndex &gt;= 0 &amp;&amp;
+      status.currentIndex &lt; songs.length
+    ) {
+      setSelectedIndex(status.currentIndex);
+    }
+  }, [status.currentIndex]);
+
+  useEffect(() =&gt; {
+    listRef.current?.scrollToIndex({
+      index: selectedIndex,
+      animated: true,
+    });
+  }, [selectedIndex, width]);
+
+  const selectSong = useCallback(
+    (index) =&gt; {
+      if (index &lt; 0 || index &gt;= songs.length || index === selectedIndex) {
+        return;
+      }
+
+      const shouldResume = status.playing;
+      setSelectedIndex(index);
+      playlist.skipTo(index);
+
+      if (shouldResume) {
+        playlist.play();
+      }
+    },
+    [playlist, selectedIndex, status.playing],
+  );
+
+  const handleMomentumEnd = useCallback(
+    (event) =&gt; {
+      const offset = event.nativeEvent.contentOffset.x;
+      const index = Math.round(offset / width);
+      selectSong(index);
+    },
+    [selectSong, width],
+  );
+
+  const handlePlayPause = useCallback(() =&gt; {
+    if (status.playing) {
+      playlist.pause();
+    } else {
+      playlist.play();
+    }
+  }, [playlist, status.playing]);
+
+  const handleNext = useCallback(() =&gt; {
+    const nextIndex = (selectedIndex + 1) % songs.length;
+    selectSong(nextIndex);
+  }, [selectSong, selectedIndex]);
+
+  const handlePrevious = useCallback(async () =&gt; {
+    if (currentTime &gt; 3) {
+      await playlist.seekTo(0);
+      return;
+    }
+
+    const previousIndex =
+      (selectedIndex - 1 + songs.length) % songs.length;
+    selectSong(previousIndex);
+  }, [currentTime, playlist, selectSong, selectedIndex]);
+
+  const renderArtwork = useCallback(
+    ({ item }) =&gt; (
+      &lt;View style={[styles.artworkPage, { width }]}&gt;
+        &lt;Image
+          source={item.artwork}
+          style={[
+            styles.artwork,
+            { width: artworkSize, height: artworkSize },
+          ]}
+        /&gt;
+      &lt;/View&gt;
+    ),
+    [artworkSize, width],
+  );
+
+  return (
+    &lt;SafeAreaView style={styles.container}&gt;
+      &lt;View style={styles.header}&gt;
+        &lt;Text style={styles.eyebrow}&gt;TOCANDO AGORA&lt;/Text&gt;
+        &lt;Text style={styles.counter}&gt;
+          {selectedIndex + 1} de {songs.length}
+        &lt;/Text&gt;
+      &lt;/View&gt;
+
+      &lt;FlatList
+        ref={listRef}
+        data={songs}
+        horizontal
+        pagingEnabled
+        renderItem={renderArtwork}
+        keyExtractor={(item) =&gt; String(item.id)}
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handleMomentumEnd}
+        getItemLayout={(_, index) =&gt; ({
+          length: width,
+          offset: width * index,
+          index,
+        })}
+      /&gt;
+
+      &lt;View style={styles.metadata}&gt;
+        &lt;Text style={styles.songTitle}&gt;{currentSong.title}&lt;/Text&gt;
+        &lt;Text style={styles.songArtist}&gt;{currentSong.artist}&lt;/Text&gt;
+      &lt;/View&gt;
+
+      &lt;View style={styles.controls}&gt;
+        &lt;Pressable onPress={handlePrevious} style={styles.sideButton}&gt;
+          &lt;Ionicons name="play-skip-back" size={28} color={colors.text} /&gt;
+        &lt;/Pressable&gt;
+
+        &lt;Pressable
+          disabled={!status.isLoaded}
+          onPress={handlePlayPause}
+          style={styles.playButton}
+        &gt;
+          &lt;Ionicons
+            name={status.playing ? 'pause' : 'play'}
+            size={38}
+            color={colors.background}
+          /&gt;
+        &lt;/Pressable&gt;
+
+        &lt;Pressable onPress={handleNext} style={styles.sideButton}&gt;
+          &lt;Ionicons name="play-skip-forward" size={28} color={colors.text} /&gt;
+        &lt;/Pressable&gt;
+      &lt;/View&gt;
+    &lt;/SafeAreaView&gt;
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    paddingBottom: 28,
+  },
+  header: {
+    height: 70,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  eyebrow: {
+    color: colors.primary,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+  },
+  counter: {
+    color: colors.textSecondary,
+    fontSize: 12,
+  },
+  artworkPage: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  artwork: {
+    borderRadius: 24,
+  },
+  metadata: {
+    minHeight: 90,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  songTitle: {
+    color: colors.text,
+    fontSize: 22,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  songArtist: {
+    marginTop: 6,
+    color: colors.textSecondary,
+    fontSize: 14,
+  },
+  controls: {
+    width: 250,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  sideButton: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surfaceElevated,
+  },
+  playButton: {
+    width: 78,
+    height: 78,
+    borderRadius: 39,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+  },
+});</code></pre>
+</details>
+<h3>Como funciona a navegação circular?</h3>
+<div class="explain-only"><strong>Trechos abaixo: apenas explicação.</strong> Eles já estão presentes no arquivo completo acima.</div>
+<details class="code-card">
+<summary><span>Somente para entender — próxima faixa</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">const nextIndex = (selectedIndex + 1) % songs.length;
+selectSong(nextIndex);</code></pre>
+</details>
+<p>O operador <code>%</code> devolve o resto da divisão. Quando o índice ultrapassa a última posição, o resultado volta para zero.</p>
+<details class="code-card">
+<summary><span>Somente para entender — faixa anterior</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">if (currentTime &gt; 3) {
+  await playlist.seekTo(0);
+  return;
+}
+
+const previousIndex =
+  (selectedIndex - 1 + songs.length) % songs.length;
+selectSong(previousIndex);</code></pre>
+</details>
+<p>Se a faixa já passou de três segundos, “anterior” reinicia a música. Caso contrário, vai à faixa anterior; na primeira música, o cálculo leva à última.</p>
+<div class="test-box"><strong>Teste 6</strong><p>Na última música, pressione próxima e confirme que volta para a primeira. Na primeira, pressione anterior e confirme que vai para a última. Depois deixe uma música tocar por mais de três segundos e pressione anterior: ela deve reiniciar.</p></div>
+<label class="step-check"><input class="progress-check" data-key="step-8" type="checkbox"/> Etapa concluída</label>
+</section>
+<section class="chapter step" data-step="9" id="etapa-9">
+<div class="step-head"><div class="step-index">09</div><div><span class="chapter-tag">PROGRESSO</span><h2>Adicionar slider, duração e formatação do tempo</h2></div></div>
+<div class="action-box"><strong>O que fazer nesta etapa</strong><p>Primeiro crie <span class="file-path">utils/formatTime.js</span> com o primeiro código. Depois abra <span class="file-path">screens/MusicPlayer.js</span> e <strong>substitua todo o conteúdo</strong> pelo segundo código.</p></div>
+<p>Vamos exibir o tempo atual, a duração total e permitir que o usuário arraste o slider para outra posição da música.</p>
+<h3>1. Criar a função que formata segundos</h3>
+<details class="code-card" open="">
+<summary><span>Crie este arquivo — utils/formatTime.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">export default function formatTime(seconds) {
+  if (!Number.isFinite(seconds) || seconds &lt; 0) {
+    return '00:00';
+  }
+
+  const totalSeconds = Math.floor(seconds);
+  const minutes = Math.floor(totalSeconds / 60);
+  const remainingSeconds = totalSeconds % 60;
+
+  return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+}
+</code></pre>
+</details>
+<p>A função recebe segundos e devolve um texto no formato <code>mm:ss</code>. <code>Number.isFinite()</code> impede que valores ainda indefinidos durante o carregamento apareçam como <code>NaN</code>.</p>
+<h3>2. Atualizar a tela do player</h3>
+<details class="code-card" open="">
+<summary><span>Substitua o arquivo inteiro — screens/MusicPlayer.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">import Ionicons from '@expo/vector-icons/Ionicons';
+import Slider from '@react-native-community/slider';
+import {
+  setAudioModeAsync,
+  useAudioPlaylist,
+  useAudioPlaylistStatus,
+} from 'expo-audio';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  FlatList,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import songs from '../model/data';
+import colors from '../theme/colors';
+import formatTime from '../utils/formatTime';
+
+const audioSources = songs.map((song) =&gt; song.url);
+
+export default function MusicPlayer() {
+  const { width } = useWindowDimensions();
+  const listRef = useRef(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isSeeking, setIsSeeking] = useState(false);
+  const [seekPosition, setSeekPosition] = useState(0);
+
+  const playlistOptions = useMemo(
+    () =&gt; ({
+      sources: audioSources,
+      loop: 'none',
+      updateInterval: 250,
+    }),
+    [],
+  );
+
+  const playlist = useAudioPlaylist(playlistOptions);
+  const status = useAudioPlaylistStatus(playlist);
+
+  const currentSong = songs[selectedIndex];
+  const artworkSize = Math.min(width - 40, 380);
+  const duration = Number.isFinite(status.duration) ? status.duration : 0;
+  const currentTime = Number.isFinite(status.currentTime) ? status.currentTime : 0;
+  const displayedPosition = isSeeking ? seekPosition : currentTime;
+
+  useEffect(() =&gt; {
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: false,
+      interruptionMode: 'doNotMix',
+    });
+  }, []);
+
+  useEffect(() =&gt; {
+    if (
+      Number.isInteger(status.currentIndex) &amp;&amp;
+      status.currentIndex &gt;= 0 &amp;&amp;
+      status.currentIndex &lt; songs.length
+    ) {
+      setSelectedIndex(status.currentIndex);
+    }
+  }, [status.currentIndex]);
+
+  useEffect(() =&gt; {
+    listRef.current?.scrollToIndex({
+      index: selectedIndex,
+      animated: true,
+    });
+  }, [selectedIndex, width]);
+
+  const selectSong = useCallback(
+    (index) =&gt; {
+      if (index &lt; 0 || index &gt;= songs.length || index === selectedIndex) {
+        return;
+      }
+
+      const shouldResume = status.playing;
+      setSelectedIndex(index);
+      playlist.skipTo(index);
+
+      if (shouldResume) {
+        playlist.play();
+      }
+    },
+    [playlist, selectedIndex, status.playing],
+  );
+
+  const handleMomentumEnd = useCallback(
+    (event) =&gt; {
+      const offset = event.nativeEvent.contentOffset.x;
+      const index = Math.round(offset / width);
+      selectSong(index);
+    },
+    [selectSong, width],
+  );
+
+  const handlePlayPause = useCallback(() =&gt; {
+    if (status.playing) {
+      playlist.pause();
+    } else {
+      playlist.play();
+    }
+  }, [playlist, status.playing]);
+
+  const handleNext = useCallback(() =&gt; {
+    const nextIndex = (selectedIndex + 1) % songs.length;
+    selectSong(nextIndex);
+  }, [selectSong, selectedIndex]);
+
+  const handlePrevious = useCallback(async () =&gt; {
+    if (currentTime &gt; 3) {
+      await playlist.seekTo(0);
+      return;
+    }
+
+    const previousIndex =
+      (selectedIndex - 1 + songs.length) % songs.length;
+    selectSong(previousIndex);
+  }, [currentTime, playlist, selectSong, selectedIndex]);
+
+  const handleSeekComplete = useCallback(
+    async (value) =&gt; {
+      await playlist.seekTo(value);
+      setIsSeeking(false);
+    },
+    [playlist],
+  );
+
+  const renderArtwork = useCallback(
+    ({ item }) =&gt; (
+      &lt;View style={[styles.artworkPage, { width }]}&gt;
+        &lt;Image
+          source={item.artwork}
+          style={[
+            styles.artwork,
+            { width: artworkSize, height: artworkSize },
+          ]}
+        /&gt;
+      &lt;/View&gt;
+    ),
+    [artworkSize, width],
+  );
+
+  return (
+    &lt;SafeAreaView style={styles.container}&gt;
+      &lt;View style={styles.header}&gt;
+        &lt;Text style={styles.eyebrow}&gt;TOCANDO AGORA&lt;/Text&gt;
+        &lt;Text style={styles.counter}&gt;
+          {selectedIndex + 1} de {songs.length}
+        &lt;/Text&gt;
+      &lt;/View&gt;
+
+      &lt;FlatList
+        ref={listRef}
+        data={songs}
+        horizontal
+        pagingEnabled
+        renderItem={renderArtwork}
+        keyExtractor={(item) =&gt; String(item.id)}
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handleMomentumEnd}
+        getItemLayout={(_, index) =&gt; ({
+          length: width,
+          offset: width * index,
+          index,
+        })}
+      /&gt;
+
+      &lt;View style={styles.metadata}&gt;
+        &lt;Text style={styles.songTitle}&gt;{currentSong.title}&lt;/Text&gt;
+        &lt;Text style={styles.songArtist}&gt;{currentSong.artist}&lt;/Text&gt;
+      &lt;/View&gt;
+
+      &lt;View style={styles.progressSection}&gt;
+        &lt;Slider
+          disabled={!status.isLoaded || duration &lt;= 0}
+          minimumValue={0}
+          maximumValue={Math.max(duration, 1)}
+          value={Math.min(displayedPosition, Math.max(duration, 1))}
+          minimumTrackTintColor={colors.primary}
+          maximumTrackTintColor="rgba(255,255,255,0.16)"
+          thumbTintColor={colors.primary}
+          step={0.1}
+          onSlidingStart={() =&gt; {
+            setSeekPosition(currentTime);
+            setIsSeeking(true);
+          }}
+          onValueChange={setSeekPosition}
+          onSlidingComplete={handleSeekComplete}
+        /&gt;
+
+        &lt;View style={styles.timeRow}&gt;
+          &lt;Text style={styles.timeText}&gt;{formatTime(displayedPosition)}&lt;/Text&gt;
+          &lt;Text style={styles.timeText}&gt;{formatTime(duration)}&lt;/Text&gt;
+        &lt;/View&gt;
+      &lt;/View&gt;
+
+      &lt;View style={styles.controls}&gt;
+        &lt;Pressable onPress={handlePrevious} style={styles.sideButton}&gt;
+          &lt;Ionicons name="play-skip-back" size={28} color={colors.text} /&gt;
+        &lt;/Pressable&gt;
+
+        &lt;Pressable
+          disabled={!status.isLoaded}
+          onPress={handlePlayPause}
+          style={styles.playButton}
+        &gt;
+          &lt;Ionicons
+            name={status.playing ? 'pause' : 'play'}
+            size={38}
+            color={colors.background}
+          /&gt;
+        &lt;/Pressable&gt;
+
+        &lt;Pressable onPress={handleNext} style={styles.sideButton}&gt;
+          &lt;Ionicons name="play-skip-forward" size={28} color={colors.text} /&gt;
+        &lt;/Pressable&gt;
+      &lt;/View&gt;
+    &lt;/SafeAreaView&gt;
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    paddingBottom: 24,
+  },
+  header: {
+    height: 70,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  eyebrow: {
+    color: colors.primary,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+  },
+  counter: {
+    color: colors.textSecondary,
+    fontSize: 12,
+  },
+  artworkPage: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  artwork: {
+    borderRadius: 24,
+  },
+  metadata: {
+    minHeight: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  songTitle: {
+    color: colors.text,
+    fontSize: 22,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  songArtist: {
+    marginTop: 6,
+    color: colors.textSecondary,
+    fontSize: 14,
+  },
+  progressSection: {
+    width: '88%',
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  timeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  timeText: {
+    color: colors.textMuted,
+    fontSize: 11,
+  },
+  controls: {
+    width: 250,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  sideButton: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surfaceElevated,
+  },
+  playButton: {
+    width: 78,
+    height: 78,
+    borderRadius: 39,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+  },
+});</code></pre>
+</details>
+<h3>Estados do slider</h3>
+<div class="explain-only"><strong>Trecho abaixo: somente explicação.</strong> Já está no MusicPlayer completo desta etapa.</div>
+<details class="code-card">
+<summary><span>Somente para entender — posição enquanto arrasta</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">const [isSeeking, setIsSeeking] = useState(false);
+const [seekPosition, setSeekPosition] = useState(0);
+
+const displayedPosition = isSeeking ? seekPosition : currentTime;</code></pre>
+</details>
+<p>Enquanto o usuário está arrastando, a interface mostra <code>seekPosition</code>. Quando ele solta, <code>playlist.seekTo(value)</code> muda a posição real do áudio.</p>
+<div class="test-box"><strong>Teste 7</strong><p>Reproduza uma música. Confirme que o tempo avança, a duração aparece e o slider acompanha. Arraste o slider para outro ponto e verifique se a reprodução continua dali.</p></div>
+<label class="step-check"><input class="progress-check" data-key="step-9" type="checkbox"/> Etapa concluída</label>
+</section>
+<section class="chapter step" data-step="10" id="etapa-10">
+<div class="step-head"><div class="step-index">10</div><div><span class="chapter-tag">RECURSOS</span><h2>Adicionar favoritos, repetição e compartilhamento</h2></div></div>
+<div class="action-box"><strong>O que fazer nesta etapa</strong><p>Abra <span class="file-path">screens/MusicPlayer.js</span> e <strong>substitua o arquivo inteiro</strong> pelo código abaixo. Nenhum outro arquivo precisa ser alterado nesta etapa.</p></div>
+<p>Agora adicionaremos três recursos visíveis no rodapé: favorito, repetição da faixa atual e compartilhamento.</p>
+<details class="code-card" open="">
+<summary><span>Substitua o arquivo inteiro — screens/MusicPlayer.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">import Ionicons from '@expo/vector-icons/Ionicons';
+import Slider from '@react-native-community/slider';
+import {
+  setAudioModeAsync,
+  useAudioPlaylist,
+  useAudioPlaylistStatus,
+} from 'expo-audio';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  FlatList,
+  Image,
+  Pressable,
+  Share,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import songs from '../model/data';
+import colors from '../theme/colors';
+import formatTime from '../utils/formatTime';
+
+const audioSources = songs.map((song) =&gt; song.url);
+
+export default function MusicPlayer() {
+  const { width } = useWindowDimensions();
+  const listRef = useRef(null);
+
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isSeeking, setIsSeeking] = useState(false);
+  const [seekPosition, setSeekPosition] = useState(0);
+  const [favoriteIds, setFavoriteIds] = useState(() =&gt; new Set());
+  const [repeatOne, setRepeatOne] = useState(false);
+
+  const playlistOptions = useMemo(
+    () =&gt; ({
+      sources: audioSources,
+      loop: 'none',
+      updateInterval: 250,
+    }),
+    [],
+  );
+
+  const playlist = useAudioPlaylist(playlistOptions);
+  const status = useAudioPlaylistStatus(playlist);
+
+  const currentSong = songs[selectedIndex];
+  const artworkSize = Math.min(width - 40, 380);
+  const duration = Number.isFinite(status.duration) ? status.duration : 0;
+  const currentTime = Number.isFinite(status.currentTime) ? status.currentTime : 0;
+  const displayedPosition = isSeeking ? seekPosition : currentTime;
+  const isFavorite = favoriteIds.has(currentSong.id);
+
+  useEffect(() =&gt; {
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: false,
+      interruptionMode: 'doNotMix',
+    });
+  }, []);
+
+  useEffect(() =&gt; {
+    playlist.loop = repeatOne ? 'single' : 'none';
+  }, [playlist, repeatOne]);
+
+  useEffect(() =&gt; {
+    if (
+      Number.isInteger(status.currentIndex) &amp;&amp;
+      status.currentIndex &gt;= 0 &amp;&amp;
+      status.currentIndex &lt; songs.length
+    ) {
+      setSelectedIndex(status.currentIndex);
+    }
+  }, [status.currentIndex]);
+
+  useEffect(() =&gt; {
+    listRef.current?.scrollToIndex({
+      index: selectedIndex,
+      animated: true,
+    });
+  }, [selectedIndex, width]);
+
+  const selectSong = useCallback(
+    (index) =&gt; {
+      if (index &lt; 0 || index &gt;= songs.length || index === selectedIndex) {
+        return;
+      }
+
+      const shouldResume = status.playing;
+      setSelectedIndex(index);
+      playlist.skipTo(index);
+
+      if (shouldResume) {
+        playlist.play();
+      }
+    },
+    [playlist, selectedIndex, status.playing],
+  );
+
+  const handleMomentumEnd = useCallback(
+    (event) =&gt; {
+      const offset = event.nativeEvent.contentOffset.x;
+      const index = Math.round(offset / width);
+      selectSong(index);
+    },
+    [selectSong, width],
+  );
+
+  const handlePlayPause = useCallback(() =&gt; {
+    if (status.playing) playlist.pause();
+    else playlist.play();
+  }, [playlist, status.playing]);
+
+  const handleNext = useCallback(() =&gt; {
+    const nextIndex = (selectedIndex + 1) % songs.length;
+    selectSong(nextIndex);
+  }, [selectSong, selectedIndex]);
+
+  const handlePrevious = useCallback(async () =&gt; {
+    if (currentTime &gt; 3) {
+      await playlist.seekTo(0);
+      return;
+    }
+
+    const previousIndex =
+      (selectedIndex - 1 + songs.length) % songs.length;
+    selectSong(previousIndex);
+  }, [currentTime, playlist, selectSong, selectedIndex]);
+
+  const handleSeekComplete = useCallback(
+    async (value) =&gt; {
+      await playlist.seekTo(value);
+      setIsSeeking(false);
+    },
+    [playlist],
+  );
+
+  const toggleFavorite = useCallback(() =&gt; {
+    setFavoriteIds((currentFavorites) =&gt; {
+      const updatedFavorites = new Set(currentFavorites);
+
+      if (updatedFavorites.has(currentSong.id)) {
+        updatedFavorites.delete(currentSong.id);
+      } else {
+        updatedFavorites.add(currentSong.id);
+      }
+
+      return updatedFavorites;
+    });
+  }, [currentSong.id]);
+
+  const shareSong = useCallback(async () =&gt; {
+    await Share.share({
+      message: `${currentSong.title} — ${currentSong.artist}\nOuça no GMusic.`,
+      title: currentSong.title,
+    });
+  }, [currentSong.artist, currentSong.title]);
+
+  const renderArtwork = useCallback(
+    ({ item }) =&gt; (
+      &lt;View style={[styles.artworkPage, { width }]}&gt;
+        &lt;Image
+          source={item.artwork}
+          style={[
+            styles.artwork,
+            { width: artworkSize, height: artworkSize },
+          ]}
+        /&gt;
+      &lt;/View&gt;
+    ),
+    [artworkSize, width],
+  );
+
+  return (
+    &lt;SafeAreaView style={styles.container}&gt;
+      &lt;View style={styles.header}&gt;
+        &lt;Text style={styles.eyebrow}&gt;TOCANDO AGORA&lt;/Text&gt;
+        &lt;Text style={styles.counter}&gt;{selectedIndex + 1} de {songs.length}&lt;/Text&gt;
+      &lt;/View&gt;
+
+      &lt;FlatList
+        ref={listRef}
+        data={songs}
+        horizontal
+        pagingEnabled
+        renderItem={renderArtwork}
+        keyExtractor={(item) =&gt; String(item.id)}
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handleMomentumEnd}
+        getItemLayout={(_, index) =&gt; ({
+          length: width,
+          offset: width * index,
+          index,
+        })}
+      /&gt;
+
+      &lt;View style={styles.metadata}&gt;
+        &lt;Text style={styles.songTitle}&gt;{currentSong.title}&lt;/Text&gt;
+        &lt;Text style={styles.songArtist}&gt;{currentSong.artist}&lt;/Text&gt;
+      &lt;/View&gt;
+
+      &lt;View style={styles.progressSection}&gt;
+        &lt;Slider
+          disabled={!status.isLoaded || duration &lt;= 0}
+          minimumValue={0}
+          maximumValue={Math.max(duration, 1)}
+          value={Math.min(displayedPosition, Math.max(duration, 1))}
+          minimumTrackTintColor={colors.primary}
+          maximumTrackTintColor="rgba(255,255,255,0.16)"
+          thumbTintColor={colors.primary}
+          step={0.1}
+          onSlidingStart={() =&gt; {
+            setSeekPosition(currentTime);
+            setIsSeeking(true);
+          }}
+          onValueChange={setSeekPosition}
+          onSlidingComplete={handleSeekComplete}
+        /&gt;
+        &lt;View style={styles.timeRow}&gt;
+          &lt;Text style={styles.timeText}&gt;{formatTime(displayedPosition)}&lt;/Text&gt;
+          &lt;Text style={styles.timeText}&gt;{formatTime(duration)}&lt;/Text&gt;
+        &lt;/View&gt;
+      &lt;/View&gt;
+
+      &lt;View style={styles.controls}&gt;
+        &lt;Pressable onPress={handlePrevious} style={styles.sideButton}&gt;
+          &lt;Ionicons name="play-skip-back" size={28} color={colors.text} /&gt;
+        &lt;/Pressable&gt;
+        &lt;Pressable disabled={!status.isLoaded} onPress={handlePlayPause} style={styles.playButton}&gt;
+          &lt;Ionicons name={status.playing ? 'pause' : 'play'} size={38} color={colors.background} /&gt;
+        &lt;/Pressable&gt;
+        &lt;Pressable onPress={handleNext} style={styles.sideButton}&gt;
+          &lt;Ionicons name="play-skip-forward" size={28} color={colors.text} /&gt;
+        &lt;/Pressable&gt;
+      &lt;/View&gt;
+
+      &lt;View style={styles.footer}&gt;
+        &lt;Pressable onPress={toggleFavorite} style={styles.footerAction}&gt;
+          &lt;Ionicons
+            name={isFavorite ? 'heart' : 'heart-outline'}
+            size={24}
+            color={isFavorite ? colors.primary : colors.textSecondary}
+          /&gt;
+          &lt;Text style={[styles.footerLabel, isFavorite &amp;&amp; styles.footerLabelActive]}&gt;
+            {isFavorite ? 'Favorita' : 'Favoritar'}
+          &lt;/Text&gt;
+        &lt;/Pressable&gt;
+
+        &lt;Pressable
+          onPress={() =&gt; setRepeatOne((value) =&gt; !value)}
+          style={styles.footerAction}
+        &gt;
+          &lt;Ionicons
+            name="repeat"
+            size={24}
+            color={repeatOne ? colors.primary : colors.textSecondary}
+          /&gt;
+          &lt;Text style={[styles.footerLabel, repeatOne &amp;&amp; styles.footerLabelActive]}&gt;
+            Repetir
+          &lt;/Text&gt;
+        &lt;/Pressable&gt;
+
+        &lt;Pressable onPress={shareSong} style={styles.footerAction}&gt;
+          &lt;Ionicons name="share-social-outline" size={24} color={colors.textSecondary} /&gt;
+          &lt;Text style={styles.footerLabel}&gt;Compartilhar&lt;/Text&gt;
+        &lt;/Pressable&gt;
+      &lt;/View&gt;
+    &lt;/SafeAreaView&gt;
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  header: {
+    height: 70,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  eyebrow: {
+    color: colors.primary,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+  },
+  counter: {
+    color: colors.textSecondary,
+    fontSize: 12,
+  },
+  artworkPage: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  artwork: {
+    borderRadius: 24,
+  },
+  metadata: {
+    minHeight: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  songTitle: {
+    color: colors.text,
+    fontSize: 22,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  songArtist: {
+    marginTop: 6,
+    color: colors.textSecondary,
+    fontSize: 14,
+  },
+  progressSection: {
+    width: '88%',
+    alignSelf: 'center',
+    marginBottom: 14,
+  },
+  timeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  timeText: {
+    color: colors.textMuted,
+    fontSize: 11,
+  },
+  controls: {
+    width: 250,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  sideButton: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surfaceElevated,
+  },
+  playButton: {
+    width: 78,
+    height: 78,
+    borderRadius: 39,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+  },
+  footer: {
+    minHeight: 72,
+    marginTop: 18,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+  },
+  footerAction: {
+    minWidth: 90,
+    minHeight: 54,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  footerLabel: {
+    color: colors.textSecondary,
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  footerLabelActive: {
+    color: colors.primary,
+  },
+});</code></pre>
+</details>
+<h3>Favoritos e <code>Set</code></h3>
+<div class="explain-only"><strong>Trechos seguintes: somente explicação.</strong></div>
+<details class="code-card">
+<summary><span>Somente para entender — estado dos favoritos</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">const [favoriteIds, setFavoriteIds] = useState(() =&gt; new Set());
+const isFavorite = favoriteIds.has(currentSong.id);</code></pre>
+</details>
+<p><code>Set</code> armazena valores únicos. Aqui guardamos apenas os IDs das músicas favoritas.</p>
+<h3>Repetição</h3>
+<details class="code-card">
+<summary><span>Somente para entender — sincronizar o loop</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">useEffect(() =&gt; {
+  playlist.loop = repeatOne ? 'single' : 'none';
+}, [playlist, repeatOne]);</code></pre>
+</details>
+<h3>Compartilhamento</h3>
+<p>A função <code>Share.share()</code> pede ao sistema operacional para abrir as opções de compartilhamento disponíveis.</p>
+<div class="test-box"><strong>Teste 8</strong><p>Marque e desmarque uma música como favorita, ative “Repetir” e verifique que a faixa reinicia ao terminar. Teste também “Compartilhar”.</p></div>
+<label class="step-check"><input class="progress-check" data-key="step-10" type="checkbox"/> Etapa concluída</label>
+</section>
+<section class="chapter step" data-step="11" id="etapa-11">
+<div class="step-head"><div class="step-index">11</div><div><span class="chapter-tag">REUTILIZAÇÃO</span><h2>Criar e usar o componente IconButton</h2></div></div>
+<div class="action-box"><strong>O que fazer nesta etapa</strong><p>Esta etapa altera <strong>dois arquivos</strong>. Primeiro crie <span class="file-path">components/IconButton.js</span>. Em seguida substitua completamente <span class="file-path">screens/MusicPlayer.js</span> pela nova versão.</p></div>
+<p>Os três botões principais têm a mesma estrutura. Vamos extrair essa estrutura para um componente reutilizável e deixar o <code>MusicPlayer</code> mais legível.</p>
+<h3>1. Criar o componente reutilizável</h3>
+<details class="code-card" open="">
+<summary><span>Crie este arquivo — components/IconButton.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">import Ionicons from '@expo/vector-icons/Ionicons';
+import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
+
+import colors from '../theme/colors';
+
+const VARIANTS = {
+  ghost: {
+    backgroundColor: 'transparent',
+    borderColor: 'transparent',
+    iconColor: colors.text,
+  },
+  surface: {
+    backgroundColor: colors.surfaceElevated,
+    borderColor: colors.border,
+    iconColor: colors.text,
+  },
+  primary: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+    iconColor: colors.background,
+  },
+};
+
+export default function IconButton({
+  accessibilityLabel,
+  active = false,
+  disabled = false,
+  icon,
+  iconSize = 24,
+  loading = false,
+  onPress,
+  size = 48,
+  variant = 'ghost',
+}) {
+  const selectedVariant = VARIANTS[variant] ?? VARIANTS.ghost;
+  const iconColor = active ? colors.primary : selectedVariant.iconColor;
+
+  return (
+    &lt;Pressable
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
+      accessibilityState={{ disabled, selected: active }}
+      disabled={disabled || loading}
+      hitSlop={10}
+      onPress={onPress}
+      style={({ pressed }) =&gt; [
+        styles.button,
+        {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: selectedVariant.backgroundColor,
+          borderColor: active ? colors.primary : selectedVariant.borderColor,
+          opacity: disabled ? 0.42 : pressed ? 0.72 : 1,
+          transform: [{ scale: pressed ? 0.96 : 1 }],
+        },
+      ]}
+    &gt;
+      {loading ? (
+        &lt;ActivityIndicator color={iconColor} /&gt;
+      ) : (
+        &lt;Ionicons name={icon} size={iconSize} color={iconColor} /&gt;
+      )}
+    &lt;/Pressable&gt;
+  );
+}
+
+const styles = StyleSheet.create({
+  button: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+});
+</code></pre>
+</details>
+<h3>2. Usar o componente no player</h3>
+<details class="code-card" open="">
+<summary><span>Substitua o arquivo inteiro — screens/MusicPlayer.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">import Ionicons from '@expo/vector-icons/Ionicons';
+import Slider from '@react-native-community/slider';
+import {
+  setAudioModeAsync,
+  useAudioPlaylist,
+  useAudioPlaylistStatus,
+} from 'expo-audio';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  FlatList,
+  Image,
+  Pressable,
+  Share,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import IconButton from '../components/IconButton';
+import songs from '../model/data';
+import colors from '../theme/colors';
+import formatTime from '../utils/formatTime';
+
+const audioSources = songs.map((song) =&gt; song.url);
+
+export default function MusicPlayer() {
+  const { width } = useWindowDimensions();
+  const listRef = useRef(null);
+
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isSeeking, setIsSeeking] = useState(false);
+  const [seekPosition, setSeekPosition] = useState(0);
+  const [favoriteIds, setFavoriteIds] = useState(() =&gt; new Set());
+  const [repeatOne, setRepeatOne] = useState(false);
+
+  const playlistOptions = useMemo(
+    () =&gt; ({ sources: audioSources, loop: 'none', updateInterval: 250 }),
+    [],
+  );
+
+  const playlist = useAudioPlaylist(playlistOptions);
+  const status = useAudioPlaylistStatus(playlist);
+
+  const currentSong = songs[selectedIndex];
+  const artworkSize = Math.min(width - 40, 380);
+  const duration = Number.isFinite(status.duration) ? status.duration : 0;
+  const currentTime = Number.isFinite(status.currentTime) ? status.currentTime : 0;
+  const displayedPosition = isSeeking ? seekPosition : currentTime;
+  const isFavorite = favoriteIds.has(currentSong.id);
+
+  useEffect(() =&gt; {
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: false,
+      interruptionMode: 'doNotMix',
+    });
+  }, []);
+
+  useEffect(() =&gt; {
+    playlist.loop = repeatOne ? 'single' : 'none';
+  }, [playlist, repeatOne]);
+
+  useEffect(() =&gt; {
+    if (Number.isInteger(status.currentIndex)) {
+      setSelectedIndex(status.currentIndex);
+    }
+  }, [status.currentIndex]);
+
+  useEffect(() =&gt; {
+    listRef.current?.scrollToIndex({ index: selectedIndex, animated: true });
+  }, [selectedIndex, width]);
+
+  const selectSong = useCallback((index) =&gt; {
+    if (index &lt; 0 || index &gt;= songs.length || index === selectedIndex) return;
+
+    const shouldResume = status.playing;
+    setSelectedIndex(index);
+    playlist.skipTo(index);
+    if (shouldResume) playlist.play();
+  }, [playlist, selectedIndex, status.playing]);
+
+  const handleMomentumEnd = useCallback((event) =&gt; {
+    const index = Math.round(event.nativeEvent.contentOffset.x / width);
+    selectSong(index);
+  }, [selectSong, width]);
+
+  const handlePlayPause = useCallback(() =&gt; {
+    if (status.playing) playlist.pause();
+    else playlist.play();
+  }, [playlist, status.playing]);
+
+  const handleNext = useCallback(() =&gt; {
+    selectSong((selectedIndex + 1) % songs.length);
+  }, [selectSong, selectedIndex]);
+
+  const handlePrevious = useCallback(async () =&gt; {
+    if (currentTime &gt; 3) {
+      await playlist.seekTo(0);
+      return;
+    }
+    selectSong((selectedIndex - 1 + songs.length) % songs.length);
+  }, [currentTime, playlist, selectSong, selectedIndex]);
+
+  const handleSeekComplete = useCallback(async (value) =&gt; {
+    await playlist.seekTo(value);
+    setIsSeeking(false);
+  }, [playlist]);
+
+  const toggleFavorite = useCallback(() =&gt; {
+    setFavoriteIds((currentFavorites) =&gt; {
+      const updated = new Set(currentFavorites);
+      if (updated.has(currentSong.id)) updated.delete(currentSong.id);
+      else updated.add(currentSong.id);
+      return updated;
+    });
+  }, [currentSong.id]);
+
+  const shareSong = useCallback(async () =&gt; {
+    await Share.share({
+      message: `${currentSong.title} — ${currentSong.artist}\nOuça no GMusic.`,
+      title: currentSong.title,
+    });
+  }, [currentSong.artist, currentSong.title]);
+
+  const renderArtwork = useCallback(({ item }) =&gt; (
+    &lt;View style={[styles.artworkPage, { width }]}&gt;
+      &lt;Image
+        source={item.artwork}
+        style={[styles.artwork, { width: artworkSize, height: artworkSize }]}
+      /&gt;
+    &lt;/View&gt;
+  ), [artworkSize, width]);
+
+  return (
+    &lt;SafeAreaView style={styles.container}&gt;
+      &lt;View style={styles.header}&gt;
+        &lt;Text style={styles.eyebrow}&gt;TOCANDO AGORA&lt;/Text&gt;
+        &lt;Text style={styles.counter}&gt;{selectedIndex + 1} de {songs.length}&lt;/Text&gt;
+      &lt;/View&gt;
+
+      &lt;FlatList
+        ref={listRef}
+        data={songs}
+        horizontal
+        pagingEnabled
+        renderItem={renderArtwork}
+        keyExtractor={(item) =&gt; String(item.id)}
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handleMomentumEnd}
+        getItemLayout={(_, index) =&gt; ({ length: width, offset: width * index, index })}
+      /&gt;
+
+      &lt;View style={styles.metadata}&gt;
+        &lt;Text style={styles.songTitle}&gt;{currentSong.title}&lt;/Text&gt;
+        &lt;Text style={styles.songArtist}&gt;{currentSong.artist}&lt;/Text&gt;
+      &lt;/View&gt;
+
+      &lt;View style={styles.progressSection}&gt;
+        &lt;Slider
+          disabled={!status.isLoaded || duration &lt;= 0}
+          minimumValue={0}
+          maximumValue={Math.max(duration, 1)}
+          value={Math.min(displayedPosition, Math.max(duration, 1))}
+          minimumTrackTintColor={colors.primary}
+          maximumTrackTintColor="rgba(255,255,255,0.16)"
+          thumbTintColor={colors.primary}
+          step={0.1}
+          onSlidingStart={() =&gt; {
+            setSeekPosition(currentTime);
+            setIsSeeking(true);
+          }}
+          onValueChange={setSeekPosition}
+          onSlidingComplete={handleSeekComplete}
+        /&gt;
+        &lt;View style={styles.timeRow}&gt;
+          &lt;Text style={styles.timeText}&gt;{formatTime(displayedPosition)}&lt;/Text&gt;
+          &lt;Text style={styles.timeText}&gt;{formatTime(duration)}&lt;/Text&gt;
+        &lt;/View&gt;
+      &lt;/View&gt;
+
+      &lt;View style={styles.controls}&gt;
+        &lt;IconButton
+          accessibilityLabel="Música anterior"
+          icon="play-skip-back"
+          iconSize={27}
+          onPress={handlePrevious}
+          size={54}
+          variant="surface"
+        /&gt;
+        &lt;IconButton
+          accessibilityLabel={status.playing ? 'Pausar música' : 'Reproduzir música'}
+          disabled={!status.isLoaded}
+          icon={status.playing ? 'pause' : 'play'}
+          iconSize={38}
+          loading={status.isBuffering}
+          onPress={handlePlayPause}
+          size={78}
+          variant="primary"
+        /&gt;
+        &lt;IconButton
+          accessibilityLabel="Próxima música"
+          icon="play-skip-forward"
+          iconSize={27}
+          onPress={handleNext}
+          size={54}
+          variant="surface"
+        /&gt;
+      &lt;/View&gt;
+
+      &lt;View style={styles.footer}&gt;
+        &lt;Pressable onPress={toggleFavorite} style={styles.footerAction}&gt;
+          &lt;Ionicons name={isFavorite ? 'heart' : 'heart-outline'} size={24} color={isFavorite ? colors.primary : colors.textSecondary} /&gt;
+          &lt;Text style={[styles.footerLabel, isFavorite &amp;&amp; styles.footerLabelActive]}&gt;{isFavorite ? 'Favorita' : 'Favoritar'}&lt;/Text&gt;
+        &lt;/Pressable&gt;
+        &lt;Pressable onPress={() =&gt; setRepeatOne((value) =&gt; !value)} style={styles.footerAction}&gt;
+          &lt;Ionicons name="repeat" size={24} color={repeatOne ? colors.primary : colors.textSecondary} /&gt;
+          &lt;Text style={[styles.footerLabel, repeatOne &amp;&amp; styles.footerLabelActive]}&gt;Repetir&lt;/Text&gt;
+        &lt;/Pressable&gt;
+        &lt;Pressable onPress={shareSong} style={styles.footerAction}&gt;
+          &lt;Ionicons name="share-social-outline" size={24} color={colors.textSecondary} /&gt;
+          &lt;Text style={styles.footerLabel}&gt;Compartilhar&lt;/Text&gt;
+        &lt;/Pressable&gt;
+      &lt;/View&gt;
+    &lt;/SafeAreaView&gt;
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  header: { height: 70, paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '800', letterSpacing: 1.5 },
+  counter: { color: colors.textSecondary, fontSize: 12 },
+  artworkPage: { alignItems: 'center', justifyContent: 'center' },
+  artwork: { borderRadius: 24 },
+  metadata: { minHeight: 80, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
+  songTitle: { color: colors.text, fontSize: 22, fontWeight: '800', textAlign: 'center' },
+  songArtist: { marginTop: 6, color: colors.textSecondary, fontSize: 14 },
+  progressSection: { width: '88%', alignSelf: 'center', marginBottom: 14 },
+  timeRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  timeText: { color: colors.textMuted, fontSize: 11 },
+  controls: { width: 252, alignSelf: 'center', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  footer: { minHeight: 72, marginTop: 18, paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', borderTopColor: colors.border, borderTopWidth: 1 },
+  footerAction: { minWidth: 90, minHeight: 54, alignItems: 'center', justifyContent: 'center', gap: 4 },
+  footerLabel: { color: colors.textSecondary, fontSize: 10, fontWeight: '600' },
+  footerLabelActive: { color: colors.primary },
+});</code></pre>
+</details>
+<h3>O que são props?</h3>
+<p>O <code>IconButton</code> recebe valores como <code>icon</code>, <code>size</code>, <code>variant</code>, <code>disabled</code> e <code>onPress</code>. Esses valores são as <strong>props</strong>. O mesmo componente passa a servir para os três botões.</p>
+<div class="explain-only"><strong>Trecho abaixo: somente explicação.</strong></div>
+<details class="code-card">
+<summary><span>Somente para entender — exemplo de uso do componente</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">&lt;IconButton
+  accessibilityLabel="Próxima música"
+  icon="play-skip-forward"
+  iconSize={27}
+  onPress={handleNext}
+  size={54}
+  variant="surface"
+/&gt;</code></pre>
+</details>
+<div class="test-box"><strong>Teste 9</strong><p>Execute novamente. Os controles devem continuar funcionando como na etapa anterior. Pressione os botões e observe o feedback visual de opacidade/escala implementado pelo <code>Pressable</code> dentro de <code>IconButton</code>.</p></div>
+<label class="step-check"><input class="progress-check" data-key="step-11" type="checkbox"/> Etapa concluída</label>
+</section>
+<section class="chapter step" data-step="12" id="etapa-12">
+<div class="step-head"><div class="step-index">12</div><div><span class="chapter-tag">INTERFACE FINAL</span><h2>Aplicar a versão final responsiva</h2></div></div>
+<div class="action-box"><strong>O que fazer nesta etapa</strong><p>Chegamos ao refinamento final. Abra <span class="file-path">screens/MusicPlayer.js</span> e <strong>substitua todo o arquivo</strong> pelo código abaixo. O componente <span class="file-path">components/IconButton.js</span> criado na etapa 11 permanece sem alterações.</p></div>
+<p>Agora aplicamos a interface final que você testou: gradiente, capa responsiva, brilho, indicadores do carrossel, acessibilidade, estado de carregamento, mensagens de erro e footer refinado.</p>
+<h3>Arquivo final da tela</h3>
+<details class="code-card" open="">
+<summary><span>Substitua o arquivo inteiro — screens/MusicPlayer.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">import Ionicons from '@expo/vector-icons/Ionicons';
+import Slider from '@react-native-community/slider';
+import {
+  setAudioModeAsync,
+  useAudioPlaylist,
+  useAudioPlaylistStatus,
+} from 'expo-audio';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  FlatList,
+  Image,
+  Platform,
+  Pressable,
+  Share,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import IconButton from '../components/IconButton';
+import songs from '../model/data';
+import colors from '../theme/colors';
+import formatTime from '../utils/formatTime';
+
+const audioSources = songs.map((song) =&gt; song.url);
+
+export default function MusicPlayer() {
+  const { height, width } = useWindowDimensions();
+  const listRef = useRef(null);
+
+  const playlistOptions = useMemo(
+    () =&gt; ({
+      sources: audioSources,
+      loop: 'none',
+      updateInterval: 250,
+    }),
+    [],
+  );
+
+  const playlist = useAudioPlaylist(playlistOptions);
+  const status = useAudioPlaylistStatus(playlist);
+
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [favoriteIds, setFavoriteIds] = useState(() =&gt; new Set());
+  const [repeatOne, setRepeatOne] = useState(false);
+  const [isSeeking, setIsSeeking] = useState(false);
+  const [seekPosition, setSeekPosition] = useState(0);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const currentSong = songs[selectedIndex] ?? songs[0];
+  const isFavorite = favoriteIds.has(currentSong.id);
+  const isCompact = height &lt; 700;
+  const contentWidth = Math.min(Math.max(width - 40, 240), 460);
+  const artworkSize = Math.min(
+    contentWidth,
+    Math.max(isCompact ? 190 : 240, height * (isCompact ? 0.34 : 0.4)),
+    420,
+  );
+
+  const duration = Number.isFinite(status.duration) ? status.duration : 0;
+  const currentTime = Number.isFinite(status.currentTime) ? status.currentTime : 0;
+  const displayedPosition = isSeeking ? seekPosition : currentTime;
+  const playerUnavailable = !status.isLoaded || status.isBuffering;
+
+  useEffect(() =&gt; {
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: false,
+      interruptionMode: 'doNotMix',
+    }).catch(() =&gt; {
+      setErrorMessage('Não foi possível configurar a reprodução de áudio.');
+    });
+  }, []);
+
+  useEffect(() =&gt; {
+    playlist.loop = repeatOne ? 'single' : 'none';
+  }, [playlist, repeatOne]);
+
+  useEffect(() =&gt; {
+    if (
+      Number.isInteger(status.currentIndex) &amp;&amp;
+      status.currentIndex &gt;= 0 &amp;&amp;
+      status.currentIndex &lt; songs.length
+    ) {
+      setSelectedIndex(status.currentIndex);
+    }
+  }, [status.currentIndex]);
+
+  useEffect(() =&gt; {
+    listRef.current?.scrollToIndex({
+      index: selectedIndex,
+      animated: true,
+    });
+  }, [selectedIndex, width]);
+
+  const reportPlaybackError = useCallback(() =&gt; {
+    setErrorMessage('Não foi possível executar esta ação no player.');
+  }, []);
+
+  const selectSong = useCallback(
+    (index) =&gt; {
+      if (index &lt; 0 || index &gt;= songs.length || index === selectedIndex) {
+        return;
+      }
+
+      try {
+        const shouldResume = status.playing;
+        setSelectedIndex(index);
+        playlist.skipTo(index);
+
+        if (shouldResume) {
+          playlist.play();
+        }
+      } catch {
+        reportPlaybackError();
+      }
+    },
+    [playlist, reportPlaybackError, selectedIndex, status.playing],
+  );
+
+  const handleMomentumEnd = useCallback(
+    (event) =&gt; {
+      const offset = event.nativeEvent.contentOffset.x;
+      const index = Math.round(offset / width);
+      selectSong(index);
+    },
+    [selectSong, width],
+  );
+
+  const handlePlayPause = useCallback(() =&gt; {
+    try {
+      if (status.playing) {
+        playlist.pause();
+      } else {
+        playlist.play();
+      }
+    } catch {
+      reportPlaybackError();
+    }
+  }, [playlist, reportPlaybackError, status.playing]);
+
+  const handleNext = useCallback(() =&gt; {
+    const nextIndex = (selectedIndex + 1) % songs.length;
+    selectSong(nextIndex);
+  }, [selectSong, selectedIndex]);
+
+  const handlePrevious = useCallback(async () =&gt; {
+    try {
+      if (currentTime &gt; 3) {
+        await playlist.seekTo(0);
+        return;
+      }
+
+      const previousIndex = (selectedIndex - 1 + songs.length) % songs.length;
+      selectSong(previousIndex);
+    } catch {
+      reportPlaybackError();
+    }
+  }, [currentTime, playlist, reportPlaybackError, selectSong, selectedIndex]);
+
+  const handleSeekComplete = useCallback(
+    async (value) =&gt; {
+      try {
+        await playlist.seekTo(value);
+      } catch {
+        reportPlaybackError();
+      } finally {
+        setIsSeeking(false);
+      }
+    },
+    [playlist, reportPlaybackError],
+  );
+
+  const toggleFavorite = useCallback(() =&gt; {
+    setFavoriteIds((currentFavorites) =&gt; {
+      const updatedFavorites = new Set(currentFavorites);
+
+      if (updatedFavorites.has(currentSong.id)) {
+        updatedFavorites.delete(currentSong.id);
+      } else {
+        updatedFavorites.add(currentSong.id);
+      }
+
+      return updatedFavorites;
+    });
+  }, [currentSong.id]);
+
+  const shareSong = useCallback(async () =&gt; {
+    try {
+      await Share.share({
+        message: `${currentSong.title} — ${currentSong.artist}\nOuça no GMusic.`,
+        title: currentSong.title,
+      });
+    } catch {
+      setErrorMessage('Não foi possível abrir o compartilhamento.');
+    }
+  }, [currentSong.artist, currentSong.title]);
+
+  const renderArtwork = useCallback(
+    ({ item }) =&gt; (
+      &lt;View style={[styles.artworkPage, { width }]}&gt;
+        &lt;View
+          style={[
+            styles.artworkGlow,
+            {
+              width: artworkSize * 0.78,
+              height: artworkSize * 0.78,
+              borderRadius: artworkSize * 0.39,
+            },
+          ]}
+        /&gt;
+        &lt;View
+          style={[
+            styles.artworkFrame,
+            {
+              width: artworkSize,
+              height: artworkSize,
+              borderRadius: Math.max(20, artworkSize * 0.07),
+            },
+          ]}
+        &gt;
+          &lt;Image
+            accessibilityLabel={`Capa da música ${item.title}`}
+            resizeMode="cover"
+            source={item.artwork}
+            style={styles.artwork}
+          /&gt;
+          &lt;LinearGradient
+            colors={['transparent', 'rgba(0, 0, 0, 0.18)']}
+            pointerEvents="none"
+            style={StyleSheet.absoluteFill}
+          /&gt;
+        &lt;/View&gt;
+      &lt;/View&gt;
+    ),
+    [artworkSize, width],
+  );
+
+  return (
+    &lt;View style={styles.container}&gt;
+      &lt;LinearGradient
+        colors={[colors.backgroundSoft, colors.background, '#090C10']}
+        end={{ x: 0.8, y: 1 }}
+        start={{ x: 0.1, y: 0 }}
+        style={StyleSheet.absoluteFill}
+      /&gt;
+
+      &lt;SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}&gt;
+        &lt;View style={[styles.header, { paddingHorizontal: Math.max(20, (width - 620) / 2) }]}&gt;
+          &lt;View&gt;
+            &lt;Text style={styles.eyebrow}&gt;TOCANDO AGORA&lt;/Text&gt;
+            &lt;Text style={styles.appName}&gt;GMusic&lt;/Text&gt;
+          &lt;/View&gt;
+
+          &lt;View style={styles.counterBadge}&gt;
+            &lt;Text style={styles.counterText}&gt;
+              {selectedIndex + 1} de {songs.length}
+            &lt;/Text&gt;
+          &lt;/View&gt;
+        &lt;/View&gt;
+
+        &lt;View style={styles.mainContent}&gt;
+          &lt;FlatList
+            data={songs}
+            decelerationRate="fast"
+            getItemLayout={(_, index) =&gt; ({
+              length: width,
+              offset: width * index,
+              index,
+            })}
+            horizontal
+            initialNumToRender={2}
+            keyExtractor={(item) =&gt; String(item.id)}
+            onMomentumScrollEnd={handleMomentumEnd}
+            pagingEnabled
+            ref={listRef}
+            renderItem={renderArtwork}
+            showsHorizontalScrollIndicator={false}
+            style={[styles.carousel, { height: artworkSize + 14 }]}
+            windowSize={3}
+          /&gt;
+
+          &lt;View style={styles.dots}&gt;
+            {songs.map((song, index) =&gt; (
+              &lt;Pressable
+                accessibilityLabel={`Ir para a música ${index + 1}`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: index === selectedIndex }}
+                hitSlop={7}
+                key={song.id}
+                onPress={() =&gt; selectSong(index)}
+                style={[
+                  styles.dot,
+                  index === selectedIndex &amp;&amp; styles.dotActive,
+                ]}
+              /&gt;
+            ))}
+          &lt;/View&gt;
+
+          &lt;View style={[styles.metadata, { width: contentWidth }]}&gt;
+            &lt;Text numberOfLines={2} style={styles.songTitle}&gt;
+              {currentSong.title}
+            &lt;/Text&gt;
+            &lt;Text numberOfLines={1} style={styles.songArtist}&gt;
+              {currentSong.artist}
+            &lt;/Text&gt;
+          &lt;/View&gt;
+
+          &lt;View style={[styles.progressSection, { width: contentWidth }]}&gt;
+            &lt;Slider
+              accessibilityLabel="Posição da música"
+              disabled={!status.isLoaded || duration &lt;= 0}
+              maximumTrackTintColor="rgba(255, 255, 255, 0.16)"
+              maximumValue={Math.max(duration, 1)}
+              minimumTrackTintColor={colors.primary}
+              minimumValue={0}
+              onSlidingComplete={handleSeekComplete}
+              onSlidingStart={() =&gt; {
+                setSeekPosition(currentTime);
+                setIsSeeking(true);
+              }}
+              onValueChange={setSeekPosition}
+              step={0.1}
+              style={styles.progressBar}
+              thumbTintColor={colors.primary}
+              value={Math.min(displayedPosition, Math.max(duration, 1))}
+            /&gt;
+
+            &lt;View style={styles.timeRow}&gt;
+              &lt;Text style={styles.timeText}&gt;{formatTime(displayedPosition)}&lt;/Text&gt;
+              &lt;Text style={styles.timeText}&gt;{formatTime(duration)}&lt;/Text&gt;
+            &lt;/View&gt;
+          &lt;/View&gt;
+
+          &lt;View style={styles.controls}&gt;
+            &lt;IconButton
+              accessibilityLabel="Música anterior"
+              icon="play-skip-back"
+              iconSize={27}
+              onPress={handlePrevious}
+              size={54}
+              variant="surface"
+            /&gt;
+
+            &lt;IconButton
+              accessibilityLabel={status.playing ? 'Pausar música' : 'Reproduzir música'}
+              disabled={!status.isLoaded}
+              icon={status.playing ? 'pause' : 'play'}
+              iconSize={38}
+              loading={status.isBuffering}
+              onPress={handlePlayPause}
+              size={78}
+              variant="primary"
+            /&gt;
+
+            &lt;IconButton
+              accessibilityLabel="Próxima música"
+              icon="play-skip-forward"
+              iconSize={27}
+              onPress={handleNext}
+              size={54}
+              variant="surface"
+            /&gt;
+          &lt;/View&gt;
+
+          &lt;View style={[styles.statusLine, { opacity: playerUnavailable ? 1 : 0 }]}&gt;
+            &lt;Ionicons name="musical-note" size={14} color={colors.textMuted} /&gt;
+            &lt;Text style={styles.statusText}&gt;
+              {status.isBuffering ? 'Carregando áudio...' : 'Preparando player...'}
+            &lt;/Text&gt;
+          &lt;/View&gt;
+
+          {errorMessage ? (
+            &lt;Pressable
+              accessibilityLabel="Fechar aviso"
+              accessibilityRole="button"
+              onPress={() =&gt; setErrorMessage('')}
+              style={[styles.errorBanner, { width: contentWidth }]}
+            &gt;
+              &lt;Ionicons name="alert-circle-outline" size={19} color={colors.danger} /&gt;
+              &lt;Text style={styles.errorText}&gt;{errorMessage}&lt;/Text&gt;
+              &lt;Ionicons name="close" size={18} color={colors.textSecondary} /&gt;
+            &lt;/Pressable&gt;
+          ) : null}
+        &lt;/View&gt;
+
+        &lt;View style={styles.footer}&gt;
+          &lt;FooterAction
+            active={isFavorite}
+            icon={isFavorite ? 'heart' : 'heart-outline'}
+            label={isFavorite ? 'Favorita' : 'Favoritar'}
+            onPress={toggleFavorite}
+          /&gt;
+          &lt;FooterAction
+            active={repeatOne}
+            icon="repeat"
+            label="Repetir"
+            onPress={() =&gt; setRepeatOne((currentValue) =&gt; !currentValue)}
+          /&gt;
+          &lt;FooterAction
+            icon="share-social-outline"
+            label="Compartilhar"
+            onPress={shareSong}
+          /&gt;
+        &lt;/View&gt;
+      &lt;/SafeAreaView&gt;
+    &lt;/View&gt;
+  );
+}
+
+function FooterAction({ active = false, icon, label, onPress }) {
+  return (
+    &lt;Pressable
+      accessibilityLabel={label}
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      hitSlop={8}
+      onPress={onPress}
+      style={({ pressed }) =&gt; [
+        styles.footerAction,
+        { opacity: pressed ? 0.65 : 1 },
+      ]}
+    &gt;
+      &lt;Ionicons
+        name={icon}
+        size={23}
+        color={active ? colors.primary : colors.textSecondary}
+      /&gt;
+      &lt;Text style={[styles.footerLabel, active &amp;&amp; styles.footerLabelActive]}&gt;
+        {label}
+      &lt;/Text&gt;
+    &lt;/Pressable&gt;
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  safeArea: {
+    flex: 1,
+  },
+  header: {
+    minHeight: 68,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 8,
+  },
+  eyebrow: {
+    color: colors.primary,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.8,
+  },
+  appName: {
+    marginTop: 3,
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+  },
+  counterBadge: {
+    minWidth: 62,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    alignItems: 'center',
+    backgroundColor: colors.primarySoft,
+    borderColor: 'rgba(255, 211, 105, 0.22)',
+    borderWidth: 1,
+  },
+  counterText: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  mainContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+    paddingTop: 4,
+    paddingBottom: 6,
+  },
+  carousel: {
+    flexGrow: 0,
+  },
+  artworkPage: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  artworkGlow: {
+    position: 'absolute',
+    backgroundColor: 'rgba(255, 211, 105, 0.09)',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.28,
+    shadowRadius: 28,
+  },
+  artworkFrame: {
+    overflow: 'hidden',
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderWidth: 1,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: Platform.OS === 'android' ? 0.38 : 0.5,
+    shadowRadius: 22,
+    elevation: 14,
+  },
+  artwork: {
+    width: '100%',
+    height: '100%',
+  },
+  dots: {
+    minHeight: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+  },
+  dotActive: {
+    width: 18,
+    backgroundColor: colors.primary,
+  },
+  metadata: {
+    alignItems: 'center',
+    minHeight: 58,
+    paddingHorizontal: 8,
+  },
+  songTitle: {
+    color: colors.text,
+    fontSize: 22,
+    lineHeight: 27,
+    fontWeight: '800',
+    textAlign: 'center',
+    letterSpacing: -0.45,
+  },
+  songArtist: {
+    marginTop: 5,
+    color: colors.textSecondary,
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  progressSection: {
+    alignItems: 'stretch',
+  },
+  progressBar: {
+    width: '100%',
+    height: 34,
+  },
+  timeRow: {
+    marginTop: -2,
+    paddingHorizontal: 3,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  timeText: {
+    color: colors.textMuted,
+    fontSize: 11,
+    fontVariant: ['tabular-nums'],
+    fontWeight: '600',
+  },
+  controls: {
+    minHeight: 82,
+    width: 252,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  statusLine: {
+    minHeight: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  statusText: {
+    color: colors.textMuted,
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  errorBanner: {
+    minHeight: 44,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+    borderRadius: 12,
+    backgroundColor: colors.dangerSoft,
+    borderColor: 'rgba(255, 122, 122, 0.2)',
+    borderWidth: 1,
+  },
+  errorText: {
+    flex: 1,
+    color: colors.text,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  footer: {
+    minHeight: 70,
+    paddingHorizontal: 24,
+    paddingTop: 9,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    backgroundColor: 'rgba(13, 17, 23, 0.82)',
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+  },
+  footerAction: {
+    minWidth: 88,
+    minHeight: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  footerLabel: {
+    color: colors.textSecondary,
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  footerLabelActive: {
+    color: colors.primary,
+  },
+});
+</code></pre>
+</details>
+<h3>Responsividade</h3>
+<div class="explain-only"><strong>O trecho abaixo é apenas para análise.</strong> Ele já está no arquivo completo acima.</div>
+<details class="code-card">
+<summary><span>Somente para entender — cálculo de largura e capa</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">const { height, width } = useWindowDimensions();
+const isCompact = height &lt; 700;
+const contentWidth = Math.min(Math.max(width - 40, 240), 460);
+const artworkSize = Math.min(
+  contentWidth,
+  Math.max(isCompact ? 190 : 240, height * (isCompact ? 0.34 : 0.4)),
+  420,
+);</code></pre>
+</details>
+<p>A capa deixa de ter dimensões fixas. Ela respeita largura, altura e limites máximos, mantendo formato quadrado.</p>
+<div class="test-box"><strong>Teste 10 — versão final</strong><p>Teste swipe, bolinhas de navegação, play/pause, anterior, próxima, slider, favorito, repetição e compartilhamento. Redimensione a janela web e confirme que a capa se adapta. Force uma ação durante carregamento para observar o estado de buffering.</p></div>
+<label class="step-check"><input class="progress-check" data-key="step-12" type="checkbox"/> Etapa concluída</label>
+</section>
+<section class="chapter step" data-step="13" id="etapa-13">
+<div class="step-head"><div class="step-index">13</div><div><span class="chapter-tag">CONFIGURAÇÃO</span><h2>Configurar app.json, splash e identificadores</h2></div></div>
+<p>O <code>app.json</code> descreve propriedades do aplicativo que não pertencem diretamente a um componente: nome, versão, orientação, ícones, plugins e identificadores Android/iOS.</p>
+<details class="code-card" open="">
+<summary><span>Arquivo completo — app.json</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">json</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-json">{
+  "expo": {
+    "name": "GMusic",
+    "slug": "gmusic",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0D1117",
+    "plugins": [
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "enableBackgroundPlayback": false,
+          "enableBackgroundRecording": false
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "resizeMode": "cover",
+          "backgroundColor": "#0D1117",
+          "dark": {
+            "image": "./assets/splash.png",
+            "backgroundColor": "#0D1117"
+          }
+        }
+      ]
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "br.com.gallo.gmusic"
+    },
+    "android": {
+      "package": "br.com.gallo.gmusic",
+      "versionCode": 1,
+      "edgeToEdgeEnabled": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0D1117"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}</code></pre>
+</details>
+<h3>Pontos importantes</h3>
+<div class="explain-list">
+<div><code>userInterfaceStyle: "dark"</code><p>Declara que a identidade principal do aplicativo é escura.</p></div>
+<div><code>expo-audio</code><p>O plugin está configurado sem gravação e sem reprodução em segundo plano, porque o GMusic desta aula apenas reproduz arquivos locais em primeiro plano.</p></div>
+<div><code>expo-splash-screen</code><p>Define imagem e cor de fundo da tela exibida durante a inicialização.</p></div>
+<div><code>android.package</code><p>Identificador único do aplicativo Android.</p></div>
+<div><code>ios.bundleIdentifier</code><p>Identificador equivalente para iOS.</p></div>
+<div><code>edgeToEdgeEnabled</code><p>Permite que o app utilize a área total da tela Android; por isso usamos safe area corretamente.</p></div>
+</div>
+<label class="step-check"><input class="progress-check" data-key="step-13" type="checkbox"/> Etapa concluída</label>
+</section>
+<section class="chapter step" data-step="14" id="etapa-14">
+<div class="step-head"><div class="step-index">14</div><div><span class="chapter-tag">VALIDAÇÃO</span><h2>Executar, testar e diagnosticar</h2></div></div>
+<h3>Executar</h3>
+<details class="code-card" open="">
+<summary><span>Comandos de execução</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">bash</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-bash"># Servidor Expo
+npx expo start
+
+# Android
+npx expo start --android
+
+# Web
+npx expo start --web
+
+# Limpar cache do Metro, se necessário
+npx expo start --clear</code></pre>
+</details>
+<h3>Verificar compatibilidade das dependências</h3>
+<details class="code-card" open="">
+<summary><span>Diagnóstico</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">bash</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-bash">npx expo install --fix
+npx expo-doctor</code></pre>
+</details>
+<p><code>expo install --fix</code> tenta alinhar as versões dos pacotes às versões esperadas pelo SDK. <code>expo-doctor</code> executa verificações do projeto e aponta incompatibilidades ou configurações suspeitas.</p>
+<h3>Roteiro de teste funcional</h3>
+<div class="checklist test-checklist">
+<label><input type="checkbox"/> App abre sem erro.</label>
+<label><input type="checkbox"/> Todas as sete capas aparecem.</label>
+<label><input type="checkbox"/> Swipe altera título e artista.</label>
+<label><input type="checkbox"/> Play e pause respondem.</label>
+<label><input type="checkbox"/> Próxima e anterior são circulares.</label>
+<label><input type="checkbox"/> Anterior reinicia após três segundos.</label>
+<label><input type="checkbox"/> Slider move a posição do áudio.</label>
+<label><input type="checkbox"/> Tempo atual e duração estão formatados.</label>
+<label><input type="checkbox"/> Repetição individual funciona.</label>
+<label><input type="checkbox"/> Favorito altera o ícone e o texto.</label>
+<label><input type="checkbox"/> Compartilhar abre a interface do sistema.</label>
+<label><input type="checkbox"/> Tela se adapta ao redimensionamento web.</label>
+</div>
+<div class="callout tip"><strong>Prática de depuração</strong><p>Quando algo não funcionar, observe primeiro o terminal do Metro e o console do navegador. Leia a primeira mensagem de erro relevante e identifique arquivo, linha e nome da variável antes de alterar o código.</p></div>
+<label class="step-check"><input class="progress-check" data-key="step-14" type="checkbox"/> Etapa concluída</label>
+</section>
+<section class="chapter" id="anatomia">
+<div class="chapter-title"><span>LEITURA DO CÓDIGO</span><h2>Anatomia do MusicPlayer final</h2></div>
+<p>Antes de consultar o arquivo completo, vale reconhecer cada grupo de imports e algumas propriedades menos óbvias usadas pela versão final.</p>
+<h3>Imports externos</h3>
+<div class="explain-list">
+<div><code>@expo/vector-icons/Ionicons</code><p>Ícones dos botões, indicadores e avisos. O nome do ícone é fornecido pela prop <code>name</code>.</p></div>
+<div><code>@react-native-community/slider</code><p>Componente de barra deslizante usado para mostrar e alterar a posição da música.</p></div>
+<div><code>expo-audio</code><p><code>setAudioModeAsync</code> configura o comportamento global do áudio; <code>useAudioPlaylist</code> cria a playlist; <code>useAudioPlaylistStatus</code> observa seu estado.</p></div>
+<div><code>expo-linear-gradient</code><p><code>LinearGradient</code> desenha o fundo e o sombreado sutil sobre a capa.</p></div>
+<div><code>react-native-safe-area-context</code><p><code>SafeAreaView</code> respeita áreas ocupadas pelo sistema operacional.</p></div>
+</div>
+<h3>Imports do React</h3>
+<div class="explain-list">
+<div><code>useState</code><p>Estado visual e interativo.</p></div>
+<div><code>useEffect</code><p>Sincronização com player e configuração externa.</p></div>
+<div><code>useRef</code><p>Referência persistente para a <code>FlatList</code>.</p></div>
+<div><code>useMemo</code><p>Memoriza o objeto de opções da playlist.</p></div>
+<div><code>useCallback</code><p>Memoriza funções usadas como callbacks.</p></div>
+</div>
+<h3>Componentes e APIs do React Native</h3>
+<div class="explain-list">
+<div><code>View</code><p>Contêiner básico de layout, semelhante conceitualmente a uma <code>div</code> na web.</p></div>
+<div><code>Text</code><p>Todo texto visível em React Native deve estar dentro de um componente de texto.</p></div>
+<div><code>Image</code><p>Renderiza a capa local da música.</p></div>
+<div><code>FlatList</code><p>Renderiza o carrossel horizontal de forma otimizada.</p></div>
+<div><code>Pressable</code><p>Cria áreas clicáveis/tocáveis e expõe o estado pressionado.</p></div>
+<div><code>Share</code><p>Abre a interface nativa de compartilhamento do sistema.</p></div>
+<div><code>Platform</code><p>Permite adaptar pequenos detalhes conforme <code>Platform.OS</code>, como o tratamento da sombra no Android.</p></div>
+<div><code>useWindowDimensions</code><p>Fornece largura e altura atuais e atualiza o componente quando elas mudam.</p></div>
+<div><code>StyleSheet</code><p>Organiza estilos e oferece utilidades como <code>StyleSheet.absoluteFill</code>.</p></div>
+</div>
+<h3>Propriedades importantes da FlatList</h3>
+<div class="explain-list">
+<div><code>horizontal</code><p>Troca o sentido da lista de vertical para horizontal.</p></div>
+<div><code>pagingEnabled</code><p>Faz a rolagem “encaixar” por páginas.</p></div>
+<div><code>onMomentumScrollEnd</code><p>Executa quando o movimento termina; só então alteramos a faixa selecionada.</p></div>
+<div><code>getItemLayout</code><p>Informa previamente o tamanho e o deslocamento de cada página, facilitando <code>scrollToIndex()</code>.</p></div>
+<div><code>initialNumToRender</code><p>Controla quantos itens são renderizados inicialmente.</p></div>
+<div><code>windowSize</code><p>Limita a janela de itens mantidos ao redor da área visível.</p></div>
+<div><code>keyExtractor</code><p>Cria uma chave estável para cada item; usamos o ID convertido para texto.</p></div>
+</div>
+<h3>Acessibilidade</h3>
+<div class="explain-list">
+<div><code>accessibilityLabel</code><p>Descrição textual que pode ser anunciada por tecnologias assistivas.</p></div>
+<div><code>accessibilityRole</code><p>Informa semanticamente que o elemento funciona como botão.</p></div>
+<div><code>accessibilityState</code><p>Comunica estados como selecionado ou desabilitado.</p></div>
+<div><code>hitSlop</code><p>Aumenta a região sensível ao toque sem alterar o tamanho visual do controle.</p></div>
+</div>
+<h3>Scripts do package.json</h3>
+<div class="explain-list">
+<div><code>npm run start</code><p>Executa <code>expo start</code>.</p></div>
+<div><code>npm run android</code><p>Executa <code>expo start --android</code>.</p></div>
+<div><code>npm run web</code><p>Executa <code>expo start --web</code>.</p></div>
+<div><code>npm run clear</code><p>Reinicia o Metro limpando o cache.</p></div>
+</div>
+</section>
+<section class="chapter" id="conceitos">
+<div class="chapter-title"><span>GUIA DE REFERÊNCIA</span><h2>Conceitos usados no projeto</h2></div>
+<div class="concept-grid">
+<article class="concept-card">
+<div class="concept-name">Componente</div>
+<p class="concept-summary">Uma função que retorna uma parte da interface.</p>
+<p>No GMusic, <code>MusicPlayer</code>, <code>IconButton</code> e <code>FooterAction</code> são componentes. Componentes podem receber props e compor outros componentes.</p>
+</article><article class="concept-card">
+<div class="concept-name">JSX</div>
+<p class="concept-summary">Sintaxe que mistura a descrição da interface com JavaScript.</p>
+<p>Tags como <code>&lt;View&gt;</code>, <code>&lt;Text&gt;</code> e <code>&lt;IconButton&gt;</code> são JSX. Expressões JavaScript entram entre chaves, como <code>{currentSong.title}</code>.</p>
+</article><article class="concept-card">
+<div class="concept-name">Props</div>
+<p class="concept-summary">Valores recebidos por um componente.</p>
+<p>O <code>IconButton</code> recebe <code>icon</code>, <code>size</code>, <code>variant</code> e <code>onPress</code>. Isso torna o componente reutilizável.</p>
+</article><article class="concept-card">
+<div class="concept-name">useState</div>
+<p class="concept-summary">Estado que muda e precisa refletir na interface.</p>
+<p>É usado para índice selecionado, favoritos, repetição, arraste do slider e mensagens de erro. Atualizar estado provoca uma nova renderização.</p>
+</article><article class="concept-card">
+<div class="concept-name">useEffect</div>
+<p class="concept-summary">Sincroniza o componente com algo externo ao cálculo da tela.</p>
+<p>Configuramos o modo de áudio, sincronizamos o loop e acompanhamos o índice atual informado pela playlist.</p>
+</article><article class="concept-card">
+<div class="concept-name">useRef</div>
+<p class="concept-summary">Guarda uma referência persistente sem causar renderização.</p>
+<p>A referência da <code>FlatList</code> permite executar <code>scrollToIndex()</code> diretamente.</p>
+</article><article class="concept-card">
+<div class="concept-name">useMemo</div>
+<p class="concept-summary">Memoriza o resultado de uma criação/cálculo.</p>
+<p>Mantém o objeto <code>playlistOptions</code> estável entre renderizações.</p>
+</article><article class="concept-card">
+<div class="concept-name">useCallback</div>
+<p class="concept-summary">Memoriza uma função conforme suas dependências.</p>
+<p>É usado em handlers e na renderização das capas, reduzindo recriações desnecessárias e deixando dependências explícitas.</p>
+</article><article class="concept-card">
+<div class="concept-name">FlatList</div>
+<p class="concept-summary">Lista otimizada do React Native.</p>
+<p>No GMusic ela é horizontal, usa paginação e renderiza as capas da coleção de músicas.</p>
+</article><article class="concept-card">
+<div class="concept-name">Pressable</div>
+<p class="concept-summary">Componente de interação por toque/clique.</p>
+<p>Além de <code>onPress</code>, informa o estado <code>pressed</code>, usado para feedback visual.</p>
+</article><article class="concept-card">
+<div class="concept-name">StyleSheet</div>
+<p class="concept-summary">Organização de estilos React Native.</p>
+<p>Não é CSS puro: propriedades seguem a API de estilos do React Native e valores numéricos normalmente representam pixels lógicos.</p>
+</article><article class="concept-card">
+<div class="concept-name">useWindowDimensions</div>
+<p class="concept-summary">Lê largura e altura atuais da janela.</p>
+<p>Ao contrário de medidas capturadas uma única vez, acompanha redimensionamentos e ajuda a criar layouts responsivos.</p>
+</article><article class="concept-card">
+<div class="concept-name">Array.map()</div>
+<p class="concept-summary">Transforma ou percorre um array.</p>
+<p>Criamos <code>audioSources</code> com <code>songs.map()</code> e geramos as bolinhas de navegação percorrendo a lista de músicas.</p>
+</article><article class="concept-card">
+<div class="concept-name">Set</div>
+<p class="concept-summary">Coleção de valores únicos.</p>
+<p>Armazena IDs das músicas favoritas, com operações rápidas de <code>has</code>, <code>add</code> e <code>delete</code>.</p>
+</article><article class="concept-card">
+<div class="concept-name">async / await</div>
+<p class="concept-summary">Forma de trabalhar com operações assíncronas.</p>
+<p>É usado em ações como <code>seekTo()</code> e <code>Share.share()</code>, que podem terminar depois da chamada inicial.</p>
+</article><article class="concept-card">
+<div class="concept-name">try / catch</div>
+<p class="concept-summary">Tratamento de erros em operações que podem falhar.</p>
+<p>O player captura falhas e transforma o problema técnico em uma mensagem visual para o usuário.</p>
+</article>
+</div>
+</section>
+<section class="chapter" id="arquivos-finais">
+<div class="chapter-title"><span>CONSULTA</span><h2>Arquivos finais completos</h2></div>
+<p>Esta seção reúne a versão final para conferência. O ideal durante a aula é chegar aqui pelas etapas anteriores.</p>
+<details class="code-card">
+<summary><span>Arquivo completo — package.json</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">json</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-json">{
+  "name": "gmusic",
+  "version": "2.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "clear": "expo start --clear"
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "~57.0.8",
+    "@expo/vector-icons": "^15.1.1",
+    "@react-native-community/slider": "5.2.0",
+    "expo": "~57.0.9",
+    "expo-audio": "~57.0.3",
+    "expo-font": "~57.0.1",
+    "expo-linear-gradient": "~57.0.1",
+    "expo-splash-screen": "~57.0.5",
+    "expo-status-bar": "~57.0.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.2",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-web": "~0.21.0"
+  }
+}</code></pre>
+</details><details class="code-card">
+<summary><span>Arquivo completo — App.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">import { StatusBar } from 'expo-status-bar';
+import {
+  initialWindowMetrics,
+  SafeAreaProvider,
+} from 'react-native-safe-area-context';
+
+import MusicPlayer from './screens/MusicPlayer';
+
+export default function App() {
+  return (
+    &lt;SafeAreaProvider initialMetrics={initialWindowMetrics}&gt;
+      &lt;StatusBar style="light" translucent /&gt;
+      &lt;MusicPlayer /&gt;
+    &lt;/SafeAreaProvider&gt;
+  );
+}</code></pre>
+</details><details class="code-card">
+<summary><span>Arquivo completo — model/data.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">const songs = [
+  {
+    id: 1,
+    title: 'Gallo, O Bárbaro',
+    artist: 'Márcio J. Morais',
+    artwork: require('../assets/img/gallo.png'),
+    url: require('../assets/audio/gallo.mp3'),
+  },
+  {
+    id: 2,
+    title: 'Márcio, Mestre Frontend',
+    artist: 'JA Gallo Junior',
+    artwork: require('../assets/img/marcio.png'),
+    url: require('../assets/audio/marcio.mp3'),
+  },
+  {
+    id: 3,
+    title: 'A Jornada de Edriano',
+    artist: 'JA Gallo Junior',
+    artwork: require('../assets/img/edriano.png'),
+    url: require('../assets/audio/edriano.mp3'),
+  },
+  {
+    id: 4,
+    title: 'Rosiene, A Especialista',
+    artist: 'JA Gallo Junior',
+    artwork: require('../assets/img/rosiene.png'),
+    url: require('../assets/audio/rosiene.mp3'),
+  },
+  {
+    id: 5,
+    title: 'Gabi Acelerada',
+    artist: 'JA Gallo Junior',
+    artwork: require('../assets/img/gabi.png'),
+    url: require('../assets/audio/gabi.mp3'),
+  },
+  {
+    id: 6,
+    title: 'Discoteca da Educação Física',
+    artist: 'JA Gallo Junior',
+    artwork: require('../assets/img/silvinha.png'),
+    url: require('../assets/audio/silvinha.mp3'),
+  },
+  {
+    id: 7,
+    title: 'Valdemir, O Viajante',
+    artist: 'JA Gallo Junior',
+    artwork: require('../assets/img/valdemir.png'),
+    url: require('../assets/audio/valdemir.mp3'),
+  },
+];
+
+export default songs;</code></pre>
+</details><details class="code-card">
+<summary><span>Arquivo completo — theme/colors.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">const colors = {
+  background: '#0D1117',
+  backgroundSoft: '#151B24',
+  surface: '#1D2530',
+  surfaceElevated: '#252F3C',
+  primary: '#FFD369',
+  primarySoft: 'rgba(255, 211, 105, 0.16)',
+  text: '#F7F8FA',
+  textSecondary: '#A8B0BC',
+  textMuted: '#707986',
+  border: 'rgba(255, 255, 255, 0.08)',
+  white: '#FFFFFF',
+  danger: '#FF7A7A',
+  dangerSoft: 'rgba(255, 122, 122, 0.14)',
+  shadow: '#000000',
+};
+
+export default colors;</code></pre>
+</details><details class="code-card">
+<summary><span>Arquivo completo — utils/formatTime.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">export default function formatTime(seconds) {
+  if (!Number.isFinite(seconds) || seconds &lt; 0) {
+    return '00:00';
+  }
+
+  const totalSeconds = Math.floor(seconds);
+  const minutes = Math.floor(totalSeconds / 60);
+  const remainingSeconds = totalSeconds % 60;
+
+  return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+}</code></pre>
+</details><details class="code-card">
+<summary><span>Arquivo completo — components/IconButton.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">import Ionicons from '@expo/vector-icons/Ionicons';
+import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
+
+import colors from '../theme/colors';
+
+const VARIANTS = {
+  ghost: {
+    backgroundColor: 'transparent',
+    borderColor: 'transparent',
+    iconColor: colors.text,
+  },
+  surface: {
+    backgroundColor: colors.surfaceElevated,
+    borderColor: colors.border,
+    iconColor: colors.text,
+  },
+  primary: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+    iconColor: colors.background,
+  },
+};
+
+export default function IconButton({
+  accessibilityLabel,
+  active = false,
+  disabled = false,
+  icon,
+  iconSize = 24,
+  loading = false,
+  onPress,
+  size = 48,
+  variant = 'ghost',
+}) {
+  const selectedVariant = VARIANTS[variant] ?? VARIANTS.ghost;
+  const iconColor = active ? colors.primary : selectedVariant.iconColor;
+
+  return (
+    &lt;Pressable
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
+      accessibilityState={{ disabled, selected: active }}
+      disabled={disabled || loading}
+      hitSlop={10}
+      onPress={onPress}
+      style={({ pressed }) =&gt; [
+        styles.button,
+        {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: selectedVariant.backgroundColor,
+          borderColor: active ? colors.primary : selectedVariant.borderColor,
+          opacity: disabled ? 0.42 : pressed ? 0.72 : 1,
+          transform: [{ scale: pressed ? 0.96 : 1 }],
+        },
+      ]}
+    &gt;
+      {loading ? (
+        &lt;ActivityIndicator color={iconColor} /&gt;
+      ) : (
+        &lt;Ionicons name={icon} size={iconSize} color={iconColor} /&gt;
+      )}
+    &lt;/Pressable&gt;
+  );
+}
+
+const styles = StyleSheet.create({
+  button: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+});</code></pre>
+</details><details class="code-card">
+<summary><span>Arquivo completo — screens/MusicPlayer.js</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">javascript</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-javascript">import Ionicons from '@expo/vector-icons/Ionicons';
+import Slider from '@react-native-community/slider';
+import {
+  setAudioModeAsync,
+  useAudioPlaylist,
+  useAudioPlaylistStatus,
+} from 'expo-audio';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  FlatList,
+  Image,
+  Platform,
+  Pressable,
+  Share,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import IconButton from '../components/IconButton';
+import songs from '../model/data';
+import colors from '../theme/colors';
+import formatTime from '../utils/formatTime';
+
+const audioSources = songs.map((song) =&gt; song.url);
+
+export default function MusicPlayer() {
+  const { height, width } = useWindowDimensions();
+  const listRef = useRef(null);
+
+  const playlistOptions = useMemo(
+    () =&gt; ({
+      sources: audioSources,
+      loop: 'none',
+      updateInterval: 250,
+    }),
+    [],
+  );
+
+  const playlist = useAudioPlaylist(playlistOptions);
+  const status = useAudioPlaylistStatus(playlist);
+
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [favoriteIds, setFavoriteIds] = useState(() =&gt; new Set());
+  const [repeatOne, setRepeatOne] = useState(false);
+  const [isSeeking, setIsSeeking] = useState(false);
+  const [seekPosition, setSeekPosition] = useState(0);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const currentSong = songs[selectedIndex] ?? songs[0];
+  const isFavorite = favoriteIds.has(currentSong.id);
+  const isCompact = height &lt; 700;
+  const contentWidth = Math.min(Math.max(width - 40, 240), 460);
+  const artworkSize = Math.min(
+    contentWidth,
+    Math.max(isCompact ? 190 : 240, height * (isCompact ? 0.34 : 0.4)),
+    420,
+  );
+
+  const duration = Number.isFinite(status.duration) ? status.duration : 0;
+  const currentTime = Number.isFinite(status.currentTime) ? status.currentTime : 0;
+  const displayedPosition = isSeeking ? seekPosition : currentTime;
+  const playerUnavailable = !status.isLoaded || status.isBuffering;
+
+  useEffect(() =&gt; {
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: false,
+      interruptionMode: 'doNotMix',
+    }).catch(() =&gt; {
+      setErrorMessage('Não foi possível configurar a reprodução de áudio.');
+    });
+  }, []);
+
+  useEffect(() =&gt; {
+    playlist.loop = repeatOne ? 'single' : 'none';
+  }, [playlist, repeatOne]);
+
+  useEffect(() =&gt; {
+    if (
+      Number.isInteger(status.currentIndex) &amp;&amp;
+      status.currentIndex &gt;= 0 &amp;&amp;
+      status.currentIndex &lt; songs.length
+    ) {
+      setSelectedIndex(status.currentIndex);
+    }
+  }, [status.currentIndex]);
+
+  useEffect(() =&gt; {
+    listRef.current?.scrollToIndex({
+      index: selectedIndex,
+      animated: true,
+    });
+  }, [selectedIndex, width]);
+
+  const reportPlaybackError = useCallback(() =&gt; {
+    setErrorMessage('Não foi possível executar esta ação no player.');
+  }, []);
+
+  const selectSong = useCallback(
+    (index) =&gt; {
+      if (index &lt; 0 || index &gt;= songs.length || index === selectedIndex) {
+        return;
+      }
+
+      try {
+        const shouldResume = status.playing;
+        setSelectedIndex(index);
+        playlist.skipTo(index);
+
+        if (shouldResume) {
+          playlist.play();
+        }
+      } catch {
+        reportPlaybackError();
+      }
+    },
+    [playlist, reportPlaybackError, selectedIndex, status.playing],
+  );
+
+  const handleMomentumEnd = useCallback(
+    (event) =&gt; {
+      const offset = event.nativeEvent.contentOffset.x;
+      const index = Math.round(offset / width);
+      selectSong(index);
+    },
+    [selectSong, width],
+  );
+
+  const handlePlayPause = useCallback(() =&gt; {
+    try {
+      if (status.playing) {
+        playlist.pause();
+      } else {
+        playlist.play();
+      }
+    } catch {
+      reportPlaybackError();
+    }
+  }, [playlist, reportPlaybackError, status.playing]);
+
+  const handleNext = useCallback(() =&gt; {
+    const nextIndex = (selectedIndex + 1) % songs.length;
+    selectSong(nextIndex);
+  }, [selectSong, selectedIndex]);
+
+  const handlePrevious = useCallback(async () =&gt; {
+    try {
+      if (currentTime &gt; 3) {
+        await playlist.seekTo(0);
+        return;
+      }
+
+      const previousIndex = (selectedIndex - 1 + songs.length) % songs.length;
+      selectSong(previousIndex);
+    } catch {
+      reportPlaybackError();
+    }
+  }, [currentTime, playlist, reportPlaybackError, selectSong, selectedIndex]);
+
+  const handleSeekComplete = useCallback(
+    async (value) =&gt; {
+      try {
+        await playlist.seekTo(value);
+      } catch {
+        reportPlaybackError();
+      } finally {
+        setIsSeeking(false);
+      }
+    },
+    [playlist, reportPlaybackError],
+  );
+
+  const toggleFavorite = useCallback(() =&gt; {
+    setFavoriteIds((currentFavorites) =&gt; {
+      const updatedFavorites = new Set(currentFavorites);
+
+      if (updatedFavorites.has(currentSong.id)) {
+        updatedFavorites.delete(currentSong.id);
+      } else {
+        updatedFavorites.add(currentSong.id);
+      }
+
+      return updatedFavorites;
+    });
+  }, [currentSong.id]);
+
+  const shareSong = useCallback(async () =&gt; {
+    try {
+      await Share.share({
+        message: `${currentSong.title} — ${currentSong.artist}\nOuça no GMusic.`,
+        title: currentSong.title,
+      });
+    } catch {
+      setErrorMessage('Não foi possível abrir o compartilhamento.');
+    }
+  }, [currentSong.artist, currentSong.title]);
+
+  const renderArtwork = useCallback(
+    ({ item }) =&gt; (
+      &lt;View style={[styles.artworkPage, { width }]}&gt;
+        &lt;View
+          style={[
+            styles.artworkGlow,
+            {
+              width: artworkSize * 0.78,
+              height: artworkSize * 0.78,
+              borderRadius: artworkSize * 0.39,
+            },
+          ]}
+        /&gt;
+        &lt;View
+          style={[
+            styles.artworkFrame,
+            {
+              width: artworkSize,
+              height: artworkSize,
+              borderRadius: Math.max(20, artworkSize * 0.07),
+            },
+          ]}
+        &gt;
+          &lt;Image
+            accessibilityLabel={`Capa da música ${item.title}`}
+            resizeMode="cover"
+            source={item.artwork}
+            style={styles.artwork}
+          /&gt;
+          &lt;LinearGradient
+            colors={['transparent', 'rgba(0, 0, 0, 0.18)']}
+            pointerEvents="none"
+            style={StyleSheet.absoluteFill}
+          /&gt;
+        &lt;/View&gt;
+      &lt;/View&gt;
+    ),
+    [artworkSize, width],
+  );
+
+  return (
+    &lt;View style={styles.container}&gt;
+      &lt;LinearGradient
+        colors={[colors.backgroundSoft, colors.background, '#090C10']}
+        end={{ x: 0.8, y: 1 }}
+        start={{ x: 0.1, y: 0 }}
+        style={StyleSheet.absoluteFill}
+      /&gt;
+
+      &lt;SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}&gt;
+        &lt;View style={[styles.header, { paddingHorizontal: Math.max(20, (width - 620) / 2) }]}&gt;
+          &lt;View&gt;
+            &lt;Text style={styles.eyebrow}&gt;TOCANDO AGORA&lt;/Text&gt;
+            &lt;Text style={styles.appName}&gt;GMusic&lt;/Text&gt;
+          &lt;/View&gt;
+
+          &lt;View style={styles.counterBadge}&gt;
+            &lt;Text style={styles.counterText}&gt;
+              {selectedIndex + 1} de {songs.length}
+            &lt;/Text&gt;
+          &lt;/View&gt;
+        &lt;/View&gt;
+
+        &lt;View style={styles.mainContent}&gt;
+          &lt;FlatList
+            data={songs}
+            decelerationRate="fast"
+            getItemLayout={(_, index) =&gt; ({
+              length: width,
+              offset: width * index,
+              index,
+            })}
+            horizontal
+            initialNumToRender={2}
+            keyExtractor={(item) =&gt; String(item.id)}
+            onMomentumScrollEnd={handleMomentumEnd}
+            pagingEnabled
+            ref={listRef}
+            renderItem={renderArtwork}
+            showsHorizontalScrollIndicator={false}
+            style={[styles.carousel, { height: artworkSize + 14 }]}
+            windowSize={3}
+          /&gt;
+
+          &lt;View style={styles.dots}&gt;
+            {songs.map((song, index) =&gt; (
+              &lt;Pressable
+                accessibilityLabel={`Ir para a música ${index + 1}`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: index === selectedIndex }}
+                hitSlop={7}
+                key={song.id}
+                onPress={() =&gt; selectSong(index)}
+                style={[
+                  styles.dot,
+                  index === selectedIndex &amp;&amp; styles.dotActive,
+                ]}
+              /&gt;
+            ))}
+          &lt;/View&gt;
+
+          &lt;View style={[styles.metadata, { width: contentWidth }]}&gt;
+            &lt;Text numberOfLines={2} style={styles.songTitle}&gt;
+              {currentSong.title}
+            &lt;/Text&gt;
+            &lt;Text numberOfLines={1} style={styles.songArtist}&gt;
+              {currentSong.artist}
+            &lt;/Text&gt;
+          &lt;/View&gt;
+
+          &lt;View style={[styles.progressSection, { width: contentWidth }]}&gt;
+            &lt;Slider
+              accessibilityLabel="Posição da música"
+              disabled={!status.isLoaded || duration &lt;= 0}
+              maximumTrackTintColor="rgba(255, 255, 255, 0.16)"
+              maximumValue={Math.max(duration, 1)}
+              minimumTrackTintColor={colors.primary}
+              minimumValue={0}
+              onSlidingComplete={handleSeekComplete}
+              onSlidingStart={() =&gt; {
+                setSeekPosition(currentTime);
+                setIsSeeking(true);
+              }}
+              onValueChange={setSeekPosition}
+              step={0.1}
+              style={styles.progressBar}
+              thumbTintColor={colors.primary}
+              value={Math.min(displayedPosition, Math.max(duration, 1))}
+            /&gt;
+
+            &lt;View style={styles.timeRow}&gt;
+              &lt;Text style={styles.timeText}&gt;{formatTime(displayedPosition)}&lt;/Text&gt;
+              &lt;Text style={styles.timeText}&gt;{formatTime(duration)}&lt;/Text&gt;
+            &lt;/View&gt;
+          &lt;/View&gt;
+
+          &lt;View style={styles.controls}&gt;
+            &lt;IconButton
+              accessibilityLabel="Música anterior"
+              icon="play-skip-back"
+              iconSize={27}
+              onPress={handlePrevious}
+              size={54}
+              variant="surface"
+            /&gt;
+
+            &lt;IconButton
+              accessibilityLabel={status.playing ? 'Pausar música' : 'Reproduzir música'}
+              disabled={!status.isLoaded}
+              icon={status.playing ? 'pause' : 'play'}
+              iconSize={38}
+              loading={status.isBuffering}
+              onPress={handlePlayPause}
+              size={78}
+              variant="primary"
+            /&gt;
+
+            &lt;IconButton
+              accessibilityLabel="Próxima música"
+              icon="play-skip-forward"
+              iconSize={27}
+              onPress={handleNext}
+              size={54}
+              variant="surface"
+            /&gt;
+          &lt;/View&gt;
+
+          &lt;View style={[styles.statusLine, { opacity: playerUnavailable ? 1 : 0 }]}&gt;
+            &lt;Ionicons name="musical-note" size={14} color={colors.textMuted} /&gt;
+            &lt;Text style={styles.statusText}&gt;
+              {status.isBuffering ? 'Carregando áudio...' : 'Preparando player...'}
+            &lt;/Text&gt;
+          &lt;/View&gt;
+
+          {errorMessage ? (
+            &lt;Pressable
+              accessibilityLabel="Fechar aviso"
+              accessibilityRole="button"
+              onPress={() =&gt; setErrorMessage('')}
+              style={[styles.errorBanner, { width: contentWidth }]}
+            &gt;
+              &lt;Ionicons name="alert-circle-outline" size={19} color={colors.danger} /&gt;
+              &lt;Text style={styles.errorText}&gt;{errorMessage}&lt;/Text&gt;
+              &lt;Ionicons name="close" size={18} color={colors.textSecondary} /&gt;
+            &lt;/Pressable&gt;
+          ) : null}
+        &lt;/View&gt;
+
+        &lt;View style={styles.footer}&gt;
+          &lt;FooterAction
+            active={isFavorite}
+            icon={isFavorite ? 'heart' : 'heart-outline'}
+            label={isFavorite ? 'Favorita' : 'Favoritar'}
+            onPress={toggleFavorite}
+          /&gt;
+          &lt;FooterAction
+            active={repeatOne}
+            icon="repeat"
+            label="Repetir"
+            onPress={() =&gt; setRepeatOne((currentValue) =&gt; !currentValue)}
+          /&gt;
+          &lt;FooterAction
+            icon="share-social-outline"
+            label="Compartilhar"
+            onPress={shareSong}
+          /&gt;
+        &lt;/View&gt;
+      &lt;/SafeAreaView&gt;
+    &lt;/View&gt;
+  );
+}
+
+function FooterAction({ active = false, icon, label, onPress }) {
+  return (
+    &lt;Pressable
+      accessibilityLabel={label}
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      hitSlop={8}
+      onPress={onPress}
+      style={({ pressed }) =&gt; [
+        styles.footerAction,
+        { opacity: pressed ? 0.65 : 1 },
+      ]}
+    &gt;
+      &lt;Ionicons
+        name={icon}
+        size={23}
+        color={active ? colors.primary : colors.textSecondary}
+      /&gt;
+      &lt;Text style={[styles.footerLabel, active &amp;&amp; styles.footerLabelActive]}&gt;
+        {label}
+      &lt;/Text&gt;
+    &lt;/Pressable&gt;
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  safeArea: {
+    flex: 1,
+  },
+  header: {
+    minHeight: 68,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 8,
+  },
+  eyebrow: {
+    color: colors.primary,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.8,
+  },
+  appName: {
+    marginTop: 3,
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+  },
+  counterBadge: {
+    minWidth: 62,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    alignItems: 'center',
+    backgroundColor: colors.primarySoft,
+    borderColor: 'rgba(255, 211, 105, 0.22)',
+    borderWidth: 1,
+  },
+  counterText: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  mainContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+    paddingTop: 4,
+    paddingBottom: 6,
+  },
+  carousel: {
+    flexGrow: 0,
+  },
+  artworkPage: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  artworkGlow: {
+    position: 'absolute',
+    backgroundColor: 'rgba(255, 211, 105, 0.09)',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.28,
+    shadowRadius: 28,
+  },
+  artworkFrame: {
+    overflow: 'hidden',
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderWidth: 1,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: Platform.OS === 'android' ? 0.38 : 0.5,
+    shadowRadius: 22,
+    elevation: 14,
+  },
+  artwork: {
+    width: '100%',
+    height: '100%',
+  },
+  dots: {
+    minHeight: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+  },
+  dotActive: {
+    width: 18,
+    backgroundColor: colors.primary,
+  },
+  metadata: {
+    alignItems: 'center',
+    minHeight: 58,
+    paddingHorizontal: 8,
+  },
+  songTitle: {
+    color: colors.text,
+    fontSize: 22,
+    lineHeight: 27,
+    fontWeight: '800',
+    textAlign: 'center',
+    letterSpacing: -0.45,
+  },
+  songArtist: {
+    marginTop: 5,
+    color: colors.textSecondary,
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  progressSection: {
+    alignItems: 'stretch',
+  },
+  progressBar: {
+    width: '100%',
+    height: 34,
+  },
+  timeRow: {
+    marginTop: -2,
+    paddingHorizontal: 3,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  timeText: {
+    color: colors.textMuted,
+    fontSize: 11,
+    fontVariant: ['tabular-nums'],
+    fontWeight: '600',
+  },
+  controls: {
+    minHeight: 82,
+    width: 252,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  statusLine: {
+    minHeight: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  statusText: {
+    color: colors.textMuted,
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  errorBanner: {
+    minHeight: 44,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+    borderRadius: 12,
+    backgroundColor: colors.dangerSoft,
+    borderColor: 'rgba(255, 122, 122, 0.2)',
+    borderWidth: 1,
+  },
+  errorText: {
+    flex: 1,
+    color: colors.text,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  footer: {
+    minHeight: 70,
+    paddingHorizontal: 24,
+    paddingTop: 9,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    backgroundColor: 'rgba(13, 17, 23, 0.82)',
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+  },
+  footerAction: {
+    minWidth: 88,
+    minHeight: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  footerLabel: {
+    color: colors.textSecondary,
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  footerLabelActive: {
+    color: colors.primary,
+  },
+});</code></pre>
+</details><details class="code-card">
+<summary><span>Arquivo completo — app.json</span><span class="summary-hint">abrir/fechar</span></summary>
+<div class="code-toolbar"><span class="code-language">json</span><button class="copy-btn" type="button">Copiar código</button></div>
+<pre><code class="language-json">{
+  "expo": {
+    "name": "GMusic",
+    "slug": "gmusic",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0D1117",
+    "plugins": [
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "enableBackgroundPlayback": false,
+          "enableBackgroundRecording": false
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "resizeMode": "cover",
+          "backgroundColor": "#0D1117",
+          "dark": {
+            "image": "./assets/splash.png",
+            "backgroundColor": "#0D1117"
+          }
+        }
+      ]
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "br.com.gallo.gmusic"
+    },
+    "android": {
+      "package": "br.com.gallo.gmusic",
+      "versionCode": 1,
+      "edgeToEdgeEnabled": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0D1117"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}</code></pre>
+</details></section>
+<section class="chapter" id="referencias">
+<div class="chapter-title"><span>FONTES OFICIAIS</span><h2>Referências para aprofundamento</h2></div>
+<p>As APIs e os conceitos principais deste tutorial podem ser aprofundados nas documentações oficiais.</p>
+<div class="reference-list">
+<a href="https://docs.expo.dev/more/create-expo/" rel="noreferrer" target="_blank"><strong>Expo — create-expo-app</strong><span>Criação de projetos e templates.</span></a>
+<a href="https://docs.expo.dev/versions/latest/sdk/audio/" rel="noreferrer" target="_blank"><strong>Expo — expo-audio</strong><span>Playlist, status e configuração do áudio.</span></a>
+<a href="https://docs.expo.dev/versions/latest/sdk/linear-gradient/" rel="noreferrer" target="_blank"><strong>Expo — LinearGradient</strong><span>Gradientes universais para Android, iOS e web.</span></a>
+<a href="https://docs.expo.dev/versions/latest/sdk/safe-area-context/" rel="noreferrer" target="_blank"><strong>Expo — Safe Area</strong><span>Área segura e SafeAreaView.</span></a>
+<a href="https://react.dev/reference/react/useState" rel="noreferrer" target="_blank"><strong>React — useState</strong><span>Estado de componentes.</span></a>
+<a href="https://react.dev/reference/react/useEffect" rel="noreferrer" target="_blank"><strong>React — useEffect</strong><span>Sincronização com sistemas externos.</span></a>
+<a href="https://react.dev/reference/react/useRef" rel="noreferrer" target="_blank"><strong>React — useRef</strong><span>Referências persistentes.</span></a>
+<a href="https://react.dev/reference/react/useMemo" rel="noreferrer" target="_blank"><strong>React — useMemo</strong><span>Memoização de valores.</span></a>
+</div>
+</section>
+<footer class="page-footer">
+<strong>GMusic — Tutorial Progressivo</strong>
+<span>React Native + Expo SDK 57</span>
+</footer>
+</main>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
